@@ -80,6 +80,8 @@ winreg = "0.52"
 [target.'cfg(target_os = "macos")'.dependencies]
 # macOS specific dependencies will be added as needed
 # Currently using only std::process::Command for networksetup
+cocoa = "0.26"
+objc = "0.2.7"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # Linux specific dependencies will be added as needed

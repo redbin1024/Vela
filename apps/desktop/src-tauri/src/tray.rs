@@ -182,13 +182,19 @@ pub fn init_tray(app: &AppHandle) -> Result<(), String> {
         .build()
         .map_err(|e| format!("Failed to create menu: {e}"))?;
 
+    #[cfg(target_os = "macos")]
+    let show_on_left = true;
+    #[cfg(not(target_os = "macos"))]
+    let show_on_left = false;
+
     let mut tray_builder = TrayIconBuilder::with_id("main")
         .menu(&menu)
-        .show_menu_on_left_click(false) // Don't show menu on left click
+        .show_menu_on_left_click(show_on_left)
         .on_menu_event(|app, event| {
             handle_menu_event(app, event.id.as_ref());
         })
         .on_tray_icon_event(|tray, event| {
+            #[cfg(not(target_os = "macos"))]
             if let tauri::tray::TrayIconEvent::Click { button, .. } = event {
                 if button == tauri::tray::MouseButton::Left {
                     // Left click: show main window
@@ -328,6 +334,16 @@ pub struct TrayMenuParams {
 #[tauri::command]
 #[allow(clippy::needless_pass_by_value)]
 pub fn update_tray_full_menu(app: AppHandle, params: TrayMenuParams) -> Result<(), String> {
+    match update_tray_full_menu_inner(app.clone(), params) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            eprintln!("[TrayError] Failed to update tray full menu: {}", e);
+            Err(e)
+        }
+    }
+}
+
+fn update_tray_full_menu_inner(app: AppHandle, params: TrayMenuParams) -> Result<(), String> {
     let tray = app
         .tray_by_id("main")
         .ok_or_else(|| "Tray icon not found".to_owned())?;

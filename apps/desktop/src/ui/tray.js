@@ -73,10 +73,22 @@ export async function updateTrayMenu(forceRefresh = false) {
         proxyGroups = trayMenuCache.proxyGroups;
     } else {
         const [config, configsList, proxyData, settings] = await Promise.all([
-            getConfig(),
-            invoke(COMMANDS.LIST_CONFIGS),
-            getProxies(),
-            invoke(COMMANDS.GET_SETTINGS),
+            getConfig().catch(err => {
+                trayLogger.warn('Tray menu failed to get config', err);
+                return { mode: 'rule' };
+            }),
+            invoke(COMMANDS.LIST_CONFIGS).catch(err => {
+                trayLogger.warn('Tray menu failed to list configs', err);
+                return [];
+            }),
+            getProxies().catch(err => {
+                trayLogger.warn('Tray menu failed to get proxies', err);
+                return { proxies: {} };
+            }),
+            invoke(COMMANDS.GET_SETTINGS).catch(err => {
+                trayLogger.warn('Tray menu failed to get settings', err);
+                return { last_config: 'config.yaml', custom_args: [] };
+            }),
         ]);
 
         /** @type {any} */

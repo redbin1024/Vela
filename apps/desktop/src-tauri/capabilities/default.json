@@ -7,6 +7,8 @@
     "autostart:allow-enable",
     "autostart:allow-disable",
     "autostart:allow-is-enabled",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-is-maximized",
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     "core:window:allow-minimize",

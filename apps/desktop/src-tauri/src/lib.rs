@@ -8,6 +8,7 @@ pub mod sys_proxy;
 pub mod tray;
 pub mod updater;
 pub mod uwp_loopback;
+pub mod plugins;
 
 use config_manager::{read_config, update_config};
 use core_manager::core::subscription_scheduler::start_scheduler;
@@ -729,6 +730,9 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            plugins::mac_rounded_corners::enable_rounded_corners,
+            plugins::mac_rounded_corners::enable_modern_window_style,
+            plugins::mac_rounded_corners::reposition_traffic_lights,
             get_portable_mode,
             set_ui_scale,
             start_core,
@@ -911,9 +915,20 @@ pub fn run() {
             {
                 scheduler_state.shutdown();
             }
+            #[cfg(target_os = "macos")]
+            let is_suid = if let Ok(paths) = core_manager::resolve_app_paths(handle) {
+                core_manager::core::tun_manager::check_mihomo_suid(&paths.core_dir.join("mihomo"))
+            } else {
+                false
+            };
+            #[cfg(not(target_os = "macos"))]
+            let is_suid = false;
+
             kill_mihomo();
-            // Smart kill: only prompts for password if there's actually a root mihomo running
-            let _ = smart_kill_all_mihomo_as_root();
+            if !is_suid {
+                // Smart kill: only prompts for password if there's actually a root mihomo running
+                let _ = smart_kill_all_mihomo_as_root();
+            }
         }
     });
 }

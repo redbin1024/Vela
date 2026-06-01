@@ -85,14 +85,22 @@ export function initTunToggle() {
                 } else {
                     try {
                         await invoke(COMMANDS.SET_TUN_ENABLED, { enable: false });
-                        await invoke(COMMANDS.DISABLE_CMD);
+                        const isSuid = await invoke(COMMANDS.DISABLE_CMD);
                         await saveSetting('tun_enabled', false);
-                        await new Promise(r => setTimeout(r, 1500));
+                        
+                        if (!isSuid) {
+                            // Only delay in legacy non-SUID mode to let osascript clean up
+                            await new Promise(r => setTimeout(r, 1500));
+                        }
 
                         const settings = await invoke(COMMANDS.GET_SETTINGS);
                         const currentConfig = settings.last_config || 'config.yaml';
                         const customArgs = settings.custom_args || [];
-                        await new Promise(r => setTimeout(r, 1000));
+
+                        if (!isSuid) {
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+
                         await restartCore(currentConfig, customArgs);
                     } catch (restartErr) {
                         tunLogger.error('failed to disable TUN', restartErr);

@@ -159,19 +159,33 @@ fn get_network_services() -> Vec<String> {
 }
 
 #[cfg(target_os = "macos")]
-fn apply_networksetup_for_services<F>(mut op: F) -> Result<(), String>
+fn apply_networksetup_for_services<F>(op: F) -> Result<(), String>
 where
-    F: FnMut(&str) -> Result<(), String>,
+    F: Fn(&str) -> Result<(), String> + Send + Sync + 'static,
 {
     let services = get_network_services();
+    let op = std::sync::Arc::new(op);
+    let mut handles = Vec::new();
+
+    for service in services {
+        let op_clone = std::sync::Arc::clone(&op);
+        let handle = std::thread::spawn(move || {
+            op_clone(&service)
+        });
+        handles.push(handle);
+    }
+
     let mut last_err: Option<String> = None;
     let mut any_success = false;
-    for service in &services {
-        match op(service) {
-            Ok(_) => any_success = true,
-            Err(err) => last_err = Some(err),
+
+    for handle in handles {
+        match handle.join() {
+            Ok(Ok(_)) => any_success = true,
+            Ok(Err(err)) => last_err = Some(err),
+            Err(_) => last_err = Some("Thread panicked".to_owned()),
         }
     }
+
     if any_success {
         Ok(())
     } else {
@@ -472,7 +486,7 @@ pub fn enable_sysproxy(server: String, bypass: Option<String>) -> Result<String,
         let (host, port) = parse_host_port(&server)?;
         validate_proxy_server(&server)?;
         let bypass_clone = bypass.clone();
-        apply_networksetup_for_services(|service| {
+        apply_networksetup_for_services(move |service| {
             // HTTP 代理
             run_networksetup(&["-setwebproxy", service, &host, &port])?;
             run_networksetup(&["-setwebproxystate", service, "on"])?;
@@ -545,7 +559,7 @@ pub fn disable_sysproxy() -> Result<String, String> {
 
     #[cfg(target_os = "macos")]
     {
-        apply_networksetup_for_services(|service| {
+        apply_networksetup_for_services(move |service| {
             run_networksetup(&["-setwebproxystate", service, "off"])?;
             run_networksetup(&["-setsecurewebproxystate", service, "off"])?;
             run_networksetup(&["-setsocksfirewallproxystate", service, "off"])?;

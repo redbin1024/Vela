@@ -524,11 +524,20 @@ pub fn kill_all_mihomo_as_root_cmd(_app: tauri::AppHandle) -> Result<(), String>
 /// Only available on macOS - TUN requires root on macOS
 #[tauri::command]
 #[cfg(target_os = "macos")]
-pub fn disable_tun_cmd(_app: tauri::AppHandle) -> Result<(), String> {
+pub fn disable_tun_cmd(app: tauri::AppHandle) -> Result<bool, String> {
     set_tun_mode(false);
-    kill_all_mihomo_as_root()?;
 
-    // Wait for ALL root processes (including osascript shell) to die
+    let paths = resolve_app_paths(&app)?;
+    let core_path = paths.core_dir.join("mihomo");
+    let is_suid = check_mihomo_suid(&core_path);
+    if is_suid {
+        super::core_process::kill_mihomo();
+        return Ok(true); // SUID mode, kill_mihomo is enough and fast, no root osascript overhead
+    } else {
+        kill_all_mihomo_as_root()?;
+    }
+
+    // Wait for ALL root processes (including osascript shell) to die (Non-SUID legacy root mode only)
     let mut waited = 0;
     loop {
         let has_root_process = std::process::Command::new("sh")
@@ -544,7 +553,7 @@ pub fn disable_tun_cmd(_app: tauri::AppHandle) -> Result<(), String> {
         waited += 200;
     }
 
-    Ok(())
+    Ok(false) // Non-SUID mode, tell frontend it might need a delay for cleanup
 }
 
 /// Tauri command to disable TUN mode on non-macOS platforms
@@ -552,11 +561,12 @@ pub fn disable_tun_cmd(_app: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 #[cfg(not(target_os = "macos"))]
 #[allow(clippy::needless_pass_by_value)]
-pub fn disable_tun_cmd(app: tauri::AppHandle) -> Result<(), String> {
+pub fn disable_tun_cmd(app: tauri::AppHandle) -> Result<bool, String> {
     set_tun_mode(false);
     // On Windows/Linux, TUN is handled via config change, no need for root kill
     // Just update the config
-    set_tun_enabled_internal(&app, false)
+    set_tun_enabled_internal(&app, false)?;
+    Ok(true)
 }
 
 /// Update TUN enable setting in `run_config.yaml` (without restarting core)
@@ -626,4 +636,63 @@ pub async fn restart_core_as_root_cmd(
     _enable_tun: bool,
 ) -> Result<String, String> {
     Ok(String::new())
+}
+
+/// Check if the mihomo executable is owned by root and has the SUID bit set
+#[cfg(target_os = "macos")]
+pub fn check_mihomo_suid<P: AsRef<std::path::Path>>(path: P) -> bool {
+    use std::os::unix::fs::MetadataExt as _;
+    if let Ok(meta) = std::fs::metadata(path) {
+        let uid = meta.uid();
+        let mode = meta.mode();
+        // uid == 0 (root) and S_ISUID (0o4000) is set
+        uid == 0 && (mode & 0o4000) != 0
+    } else {
+        false
+    }
+}
+
+/// Ensure the mihomo executable is configured as setuid root on macOS.
+/// Prompts the user once with administrator privileges if SUID is not yet set.
+#[cfg(target_os = "macos")]
+pub async fn ensure_mihomo_setuid_root(app: &AppHandle) -> Result<(), String> {
+    let paths = resolve_app_paths(app)?;
+    let core_path = paths.core_dir.join("mihomo");
+    if !core_path.exists() {
+        return Err("Mihomo executable not found".to_owned());
+    }
+
+    if check_mihomo_suid(&core_path) {
+        return Ok(());
+    }
+
+    // Set permission SUID
+    let core_path_str = core_path.to_string_lossy().into_owned();
+    let escaped_path = core_path_str.replace("'", "'\\''");
+    
+    // SUID needs root ownership and 4755 permissions
+    let script = format!(
+        r#"do shell script "chown root:admin '{escaped_path}' && chmod 4755 '{escaped_path}'" with administrator privileges"#
+    );
+
+    let status = tokio::task::spawn_blocking(move || {
+        std::process::Command::new("osascript")
+            .arg("-e")
+            .arg(&script)
+            .status()
+    })
+    .await
+    .map_err(|e| format!("Blocking task failed: {e}"))?
+    .map_err(|e| format!("Failed to run osascript SUID setup: {e}"))?;
+
+    if !status.success() {
+        return Err("Authorization canceled or failed".to_owned());
+    }
+
+    // Double check
+    if check_mihomo_suid(&core_path) {
+        Ok(())
+    } else {
+        Err("Failed to verify SUID permissions on mihomo".to_owned())
+    }
 }

@@ -23,7 +23,7 @@ const HEALTH_CHECK_MAX_RETRIES: u32 = 20;
 const HEALTH_CHECK_INITIAL_INTERVAL_MS: u64 = 50;
 const HEALTH_CHECK_MAX_INTERVAL_MS: u64 = 1000;
 #[cfg(target_os = "macos")]
-use super::tun_manager::{is_tun_mode, restart_core_as_root};
+use super::tun_manager::is_tun_mode;
 use super::{AppPaths, CoreStartResult, MihomoState, CORE_STARTING};
 
 #[cfg(target_os = "windows")]
@@ -281,11 +281,31 @@ pub fn kill_mihomo() {
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn ensure_executable(path: &Path) -> Result<(), String> {
+    use std::os::unix::fs::MetadataExt as _;
     let metadata = fs::metadata(path).map_err(|e| format!("Failed to read core metadata: {e}"))?;
+    
+    // If the file already has execute permissions for owner, group, and others (0o111),
+    // skip setting permissions. This prevents EPERM (Operation not permitted) when the file
+    // is owned by root (e.g. SUID-root helper).
+    let mode = metadata.mode();
+    if (mode & 0o111) == 0o111 {
+        return Ok(());
+    }
+
     let mut permissions = metadata.permissions();
     permissions.set_mode(0o755);
-    fs::set_permissions(path, permissions)
-        .map_err(|e| format!("Failed to set executable permissions: {e}"))
+    match fs::set_permissions(path, permissions) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            // If we get PermissionDenied/EPERM but the file is already executable by owner, ignore
+            if e.kind() == std::io::ErrorKind::PermissionDenied || e.raw_os_error() == Some(1) {
+                if (mode & 0o100) != 0 {
+                    return Ok(());
+                }
+            }
+            Err(format!("Failed to set executable permissions: {e}"))
+        }
+    }
 }
 
 #[cfg(target_os = "windows")]
@@ -1152,11 +1172,11 @@ pub async fn start_core(
     // Check if TUN mode is active via flag (memory-based, not from config file)
     #[cfg(target_os = "macos")]
     if is_tun_mode() {
-        let secret = restart_core_as_root(&app, true).await?;
-        return Ok(CoreStartResult {
-            secret,
-            port: DEFAULT_API_PORT,
-        });
+        let exe_path = get_core_exe_path(&app)?;
+        if !super::tun_manager::check_mihomo_suid(&exe_path) {
+            // Prompt for SUID authorization once. If canceled, return error immediately to avoid double prompting
+            super::tun_manager::ensure_mihomo_setuid_root(&app).await?;
+        }
     }
 
     // Kill any existing mihomo processes before starting a new one
@@ -1225,7 +1245,7 @@ pub async fn start_core(
     let resolved_secret = secret.unwrap_or_else(generate_secret);
 
     // Read global user preferences from settings.json to override YAML profile values
-    let global_prefs = {
+    let mut global_prefs = {
         let settings_state = app.state::<crate::SettingsState>();
         let settings = settings_state
             .0
@@ -1233,6 +1253,13 @@ pub async fn start_core(
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         Some(settings.to_global_prefs())
     };
+
+    #[cfg(target_os = "macos")]
+    if is_tun_mode() {
+        if let Some(ref mut prefs) = global_prefs {
+            prefs.tun_enabled = Some(true);
+        }
+    }
 
     let (active_config_name, final_config, config_port) = select_runtime_config(
         &paths,

@@ -47,12 +47,14 @@ import {
 } from './ui/tray.js';
 import { initProxyToggle, updateSysProxyUI } from './ui/sysproxy.js';
 import { initWindowControls } from './ui/window-controls.js';
+import { initShortcutMenu } from './ui/shortcut-menu.js';
 import { initDeepLink } from './ui/deep-link.js';
 import { sendOSNotification } from './ui/os-notification.js';
 import { initGlobalShortcut, registerDefaultShortcuts, initShortcutSettings } from './ui/global-shortcut.js';
 import { bind } from './ui/bind.js';
 import { appStore } from './ui/state.js';
 import { Bus, Events } from './ui/events.js';
+import { enableModernWindowStyle } from './ui/mac-rounded-corners.js';
 
 /** @type {any} */
 const _win = /** @type {any} */ (window);
@@ -125,6 +127,14 @@ async function initApp() {
 
   // 3. Initialize window controls
   initWindowControls();
+  initShortcutMenu();
+
+  // 3b. Enable macOS Native Rounded Corners & Shadows
+  enableModernWindowStyle({
+    cornerRadius: 12,
+    offsetX: 0,
+    offsetY: 0
+  }).catch(err => apiLogger.warn('Failed to enable macOS rounded corners', err));
 
   // 4. Show window
   setTimeout(async () => {
@@ -138,6 +148,8 @@ async function initApp() {
   // 5. Start core and configure endpoints
   /** @type {string|null} */
   let secret = null;
+  let configPath = 'config.yaml';
+  let customArgs = [];
   try {
     const tGetSettings = performance.now();
     const settings = await invoke(COMMANDS.GET_SETTINGS);
@@ -149,8 +161,8 @@ async function initApp() {
     }
 
     const tStartCore = performance.now();
-    const configPath = settings.last_config || 'config.yaml';
-    const customArgs = settings.custom_args || [];
+    configPath = settings.last_config || 'config.yaml';
+    customArgs = settings.custom_args || [];
     apiLogger.info(`[Zephyr] calling start_core (config=${configPath})`);
     const coreResult = await invoke(COMMANDS.START_CORE, {
       configPath,
@@ -205,9 +217,32 @@ async function initApp() {
   } catch (err) {
     const message = err?.toString?.() || 'Core start failed';
     apiLogger.error('Failed to start core', err);
-    sendOSNotification('Zephyr', message).catch(() => {});
-    alert(message);
-    return;
+    if (message.includes('Could not find mihomo in app data core directory')) {
+      try {
+        showNotification('Mihomo core not found, downloading...', 'info');
+        const latest = await invoke(COMMANDS.GET_LATEST_VERSION);
+        const coreResult = await invoke(COMMANDS.UPDATE_CORE, {
+          url: latest.download_url,
+        });
+        secret = coreResult.secret;
+        const port = coreResult.port;
+        setBaseUrl(`http://127.0.0.1:${port}`);
+        setWsBaseUrl(`ws://127.0.0.1:${port}`);
+        setSecret(secret || '');
+        setWsSecret(secret || '');
+        showNotification('Mihomo core downloaded and started', 'success');
+      } catch (downloadErr) {
+        const downloadMessage = downloadErr?.toString?.() || 'Core download failed';
+        apiLogger.error('Failed to download core', downloadErr);
+        sendOSNotification('Zephyr', downloadMessage).catch(() => {});
+        alert(downloadMessage);
+        return;
+      }
+    } else {
+      sendOSNotification('Zephyr', message).catch(() => {});
+      alert(message);
+      return;
+    }
   }
 
   // 6. Initialize all UI modules

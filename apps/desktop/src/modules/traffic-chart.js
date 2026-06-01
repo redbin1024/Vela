@@ -236,14 +236,19 @@ export function cleanupChart() {
  * @param {number} data.raw.down - Download speed in bytes/s
  */
 export function updateTrafficData(data) {
-  trafficHistory.push({
-    up: data.raw.up,
-    down: data.raw.down,
-    time: Date.now(),
-  });
+  const upVal = Number(data?.raw?.up);
+  const downVal = Number(data?.raw?.down);
 
-  if (trafficHistory.length > MAX_DATA_POINTS) {
-    trafficHistory.shift();
+  if (!isNaN(upVal) && !isNaN(downVal)) {
+    trafficHistory.push({
+      up: upVal,
+      down: downVal,
+      time: Date.now(),
+    });
+
+    if (trafficHistory.length > MAX_DATA_POINTS) {
+      trafficHistory.shift();
+    }
   }
 
   scheduleRender();
@@ -333,14 +338,8 @@ function renderChart() {
 
   if (trafficHistory.length < 2) return;
 
-  // Filter out any non-numeric entries for safety
-  const validData = trafficHistory.filter(
-    (d) => !isNaN(d.up) && !isNaN(d.down),
-  );
-  if (validData.length < 2) return;
-
   // Dynamic Y-axis scale with a floor of 10 KB/s
-  let maxVal = Math.max(...validData.map((d) => Math.max(d.up, d.down)));
+  let maxVal = Math.max(...trafficHistory.map((d) => Math.max(d.up, d.down)));
   maxVal = Math.max(maxVal, 1024 * 10);
 
   const getY = (/** @type {number} */ v) => height - ((v / maxVal) * (height - 20)) - 10;

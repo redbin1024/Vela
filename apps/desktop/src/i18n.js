@@ -268,7 +268,7 @@ export const translations = {
         switching: "Switching...",
         addPortForwarding: "Add Port Forwarding",
         // Tray Menu
-        trayShow: "Show Zephyr",
+        trayShow: "Show Vela",
         trayQuit: "Quit",
         traySysProxy: "System Proxy",
         trayTunMode: "TUN Mode",
@@ -402,7 +402,7 @@ export const translations = {
 
         // Client Update
         clientUpdate: "Client Update",
-        clientUpdateDesc: "Check for Zephyr application updates",
+        clientUpdateDesc: "Check for Vela application updates",
         clientChecking: "Checking for updates...",
         clientUpdateAvailable: "Update Available",
         clientNewVersion: "A new version is available.",
@@ -413,7 +413,7 @@ export const translations = {
 
         // Auto update & core/client distinction
         autoUpdateClient: "Auto-check client updates",
-        autoUpdateClientDesc: "Automatically check for Zephyr client updates on startup",
+        autoUpdateClientDesc: "Automatically check for Vela client updates on startup",
         coreUpdate: "Core Update",
 
         // Dual update notification
@@ -996,7 +996,7 @@ export const translations = {
 
         // Client Update
         clientUpdate: "客户端更新",
-        clientUpdateDesc: "检查 Zephyr 应用程序更新",
+        clientUpdateDesc: "检查 Vela 应用程序更新",
         clientChecking: "正在检查更新...",
         clientUpdateAvailable: "发现新版本",
         clientNewVersion: "有新版本可用。",
@@ -1007,7 +1007,7 @@ export const translations = {
 
         // Auto update & core/client distinction
         autoUpdateClient: "自动检查软件更新",
-        autoUpdateClientDesc: "启动时自动检查 Zephyr 客户端更新",
+        autoUpdateClientDesc: "启动时自动检查 Vela 客户端更新",
         coreUpdate: "内核更新",
 
         // Dual update notification

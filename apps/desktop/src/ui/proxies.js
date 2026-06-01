@@ -15,7 +15,7 @@ import { debounce } from '../utils/debounce.js';
 import { translations, currentLang, t } from '../i18n.js';
 import { showNotification } from './notifications.js';
 import { SVG_ICONS } from './icons.js';
-import { setup3DEffect } from './3d-effect.js';
+import { setup3DEffect, setup3DEffectForContainer } from './3d-effect.js';
 import { createRovingTabindex } from '../utils/roving-tabindex.js';
 import { COMMANDS } from '@zephyr/shared';
 import { getConfigCached, getProxiesCached, getSettingsCached, invalidateProxiesCache } from './cache.js';
@@ -734,6 +734,7 @@ export function initProxyControls() {
                 if (card instanceof HTMLElement) card.click();
             },
         });
+        setup3DEffectForContainer(proxyList);
     }
 }
 
@@ -1291,7 +1292,6 @@ function buildProxyWrappers(container, proxies, data, current, mainGroup) {
         const card = createCard(wrapper);
         setProxyPendingState(card, appStore.get('isTestingLatency'));
         wrapper.appendChild(card);
-        setup3DEffect(card);
 
         fragment.appendChild(wrapper);
     });

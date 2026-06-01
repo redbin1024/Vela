@@ -15,10 +15,40 @@ import { getCurrentWindow } from '../api.js';
  * - App title icon: falls back to app-icon.png on error
  */
 export function initWindowControls() {
+    if (/Macintosh|Mac OS X/i.test(navigator.userAgent)) {
+        document.body.classList.add('platform-mac');
+    }
+
     const closeBtn = document.getElementById('close-btn');
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             getCurrentWindow().close();
+        });
+    }
+
+    const minBtn = document.getElementById('min-btn');
+    if (minBtn) {
+        minBtn.addEventListener('click', () => {
+            getCurrentWindow().minimize();
+        });
+    }
+
+    const maxBtn = document.getElementById('max-btn');
+    if (maxBtn) {
+        maxBtn.addEventListener('click', async () => {
+            const win = getCurrentWindow();
+            try {
+                // @ts-ignore - isMaximized is a promise in tauri v2
+                const max = await win.isMaximized();
+                if (max) {
+                    await win.unmaximize();
+                } else {
+                    await win.maximize();
+                }
+            } catch (e) {
+                // fallback
+                await win.maximize();
+            }
         });
     }
 

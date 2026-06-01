@@ -280,6 +280,7 @@ function bindConnectionsEvents() {
     const searchClone = bindOnce(document.getElementById('connections-search-input'));
     const closeAllClone = bindOnce(document.getElementById('close-all-conns-btn'));
     const refreshClone = bindOnce(document.getElementById('refresh-conns-btn'));
+    const listClone = bindOnce(document.getElementById('connections-list'));
 
     if (searchClone) {
         searchClone.addEventListener('input', (e) => {
@@ -301,6 +302,19 @@ function bindConnectionsEvents() {
 
     if (refreshClone) {
         refreshClone.addEventListener('click', () => fetchAndRenderConnections());
+    }
+
+    if (listClone) {
+        listClone.addEventListener('click', (e) => {
+            const target = /** @type {HTMLElement} */ (e.target);
+            const row = target.closest('.conn-row');
+            if (!row) return;
+            const connId = (/** @type {HTMLElement} */ (row)).dataset.connId;
+            const connMode = (/** @type {HTMLElement} */ (row)).dataset.mode;
+            const sourceList = connMode === 'closed' ? closedConnections : cachedConnections;
+            const conn = sourceList.find(c => c.id === connId);
+            if (conn) showConnDetail(conn, /** @type {string} */ (connMode));
+        });
     }
 
     // Bind sortable header clicks
@@ -503,17 +517,6 @@ function renderConnectionList(connections, mode, _searchQuery) {
     }
 
     container.innerHTML = filtered.map((/** @type {any} */ conn) => buildConnectionRow(conn, mode)).join('');
-
-    // Bind row click → open detail panel
-    for (const row of container.querySelectorAll('.conn-row')) {
-        /** @type {HTMLElement} */ (row).addEventListener('click', () => {
-            const connId = /** @type {HTMLElement} */ (row).dataset.connId;
-            const connMode = /** @type {HTMLElement} */ (row).dataset.mode;
-            const sourceList = connMode === 'closed' ? closedConnections : cachedConnections;
-            const conn = sourceList.find(c => c.id === connId);
-            if (conn) showConnDetail(conn, /** @type {string} */ (connMode));
-        });
-    }
 
     // Re-apply sort arrows (in case i18n or other code reset header text)
     updateSortIndicators();
