@@ -50,7 +50,7 @@ uuid = { version = "1", features = ["v4"] }
 url = "2"
 aes-gcm = "0.10"
 pbkdf2 = "0.12"
-hmac = "0.12"
+hmac = "0.13"
 clash-prism-core = "0.1.5"
 clash-prism-extension = { version = "0.1.8", features = ["watcher"] }
 clash-prism-plugin = "0.1.1"
