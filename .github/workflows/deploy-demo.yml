@@ -26,12 +26,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout main (Zephyr frontend source)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: main
 
       - name: Checkout demo branch (demo-specific files)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: demo
           path: demo-branch
