@@ -11,7 +11,7 @@ import { showNotification } from './notifications.js';
 import { initCustomDropdown } from './dropdown.js';
 import { translations, currentLang } from '../i18n.js';
 import { invoke, closeAllConnections } from '../api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { fetchAndConvertSRRules } from '../rules.js';
 import { SVG_ICONS } from './icons.js';
 import { getActiveConfigContent } from './advanced.js';

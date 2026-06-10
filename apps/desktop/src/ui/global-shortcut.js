@@ -14,7 +14,7 @@ import { updateSysProxyUI } from './sysproxy.js';
 import { updateTrayStatus, updateTrayMenu } from './tray.js';
 import { updateModeUI } from './modes.js';
 import { appStore } from './state.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { apiLogger } from '../utils/logger.js';
 
 // ---------------------------------------------------------------------------

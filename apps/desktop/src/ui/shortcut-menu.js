@@ -7,7 +7,7 @@
 
 import { appStore } from './state.js';
 import { invoke, getProxies, switchProxy, closeAllConnections, getCurrentWindow } from '../api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { switchToConfig } from './lifecycle.js';
 import { invalidateProxiesCache } from './cache.js';
 import { invalidateRunConfigCache } from './run-config-cache.js';

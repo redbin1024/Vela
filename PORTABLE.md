@@ -1,4 +1,4 @@
-# Zephyr 便携版使用说明
+# Vela 便携版使用说明
 
 ## 什么是便携版？
 
@@ -6,22 +6,22 @@
 
 ## 下载
 
-从 [Releases](https://github.com/Juwan-Hwang/Zephyr/releases) 下载：
-- **Windows**: `Zephyr-windows-portable.zip`
-- **Linux**: `Zephyr-linux-portable.tar.gz` (包含 AppImage + 数据目录)
+从 [Releases](https://github.com/redbin1024/Vela/releases) 下载：
+- **Windows**: `Vela-windows-portable.zip`
+- **Linux**: `Vela-linux-portable.tar.gz` (包含 AppImage + 数据目录)
 
 ## 使用方法
 
 ### Windows
 
-1. 解压 `Zephyr-windows-portable.zip` 到任意目录（如 U 盘、桌面）
+1. 解压 `Vela-windows-portable.zip` 到任意目录（如 U 盘、桌面）
 2. 确保目录中有 `.portable` 标记文件
-3. 运行 `Zephyr.exe`
+3. 运行 `Vela.exe`
 
 目录结构：
 ```
-Zephyr/
-├── Zephyr.exe
+Vela/
+├── Vela.exe
 ├── .portable          ← 便携模式标记（必须有）
 ├── core/              ← mihomo 核心和 Geo 数据
 ├── profiles/          ← 订阅配置文件
@@ -32,21 +32,21 @@ Zephyr/
 
 ### Linux (AppImage)
 
-1. 解压 `Zephyr-linux-portable.tar.gz`
+1. 解压 `Vela-linux-portable.tar.gz`
 2. 确保 `.portable` 文件与 `.AppImage` 在同一目录
-3. 运行 `./Zephyr-*.AppImage`
+3. 运行 `./Vela-*.AppImage`
 
 ```bash
-tar xzf Zephyr-linux-portable.tar.gz
-cd Zephyr
-chmod +x Zephyr-*.AppImage
-./Zephyr-*.AppImage
+tar xzf Vela-linux-portable.tar.gz
+cd Vela
+chmod +x Vela-*.AppImage
+./Vela-*.AppImage
 ```
 
 目录结构：
 ```
-Zephyr/
-├── Zephyr-*.AppImage
+Vela/
+├── Vela-*.AppImage
 ├── .portable          ← 便携模式标记
 ├── core/
 ├── profiles/
@@ -84,8 +84,8 @@ Zephyr/
 
 1. 下载便携版并解压
 2. 复制安装版的配置：
-   - **Windows**: `%AppData%\com.zephyr.desktop\` 下的 `profiles/`、`prism/`、`settings.json`
-   - **Linux**: `~/.config/com.zephyr.desktop/` 下的对应文件
+   - **Windows**: `%AppData%\com.vela.desktop\` 下的 `profiles/`、`prism/`、`settings.json`
+   - **Linux**: `~/.config/com.vela.desktop/` 下的对应文件
 3. 粘贴到便携版目录
 4. 确保有 `.portable` 标记文件
 5. 运行便携版
@@ -99,7 +99,7 @@ Zephyr/
 ### Linux AppImage 无法启动
 ```bash
 # 检查执行权限
-chmod +x Zephyr-*.AppImage
+chmod +x Vela-*.AppImage
 
 # 检查 .portable 文件是否存在
 ls -la .portable

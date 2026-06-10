@@ -15,7 +15,7 @@
 // A failure here means a "silent" integration bug that unit tests cannot catch.
 
 import { describe, it, expect } from 'vitest';
-import { COMMANDS, PRISM, RULE } from '@zephyr/shared';
+import { COMMANDS, PRISM, RULE } from '@vela/shared';
 import { translations } from './i18n.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -206,10 +206,10 @@ describe('UI → shared/index.js COMMANDS reference contract', () => {
         expect(values.length).toBe(unique.size);
     });
 
-    it('@zephyr/shared COMMANDS keys match _shared/index.js COMMANDS keys', async () => {
+    it('@vela/shared COMMANDS keys match _shared/index.js COMMANDS keys', async () => {
         // This test catches the critical bug where two independent COMMANDS
         // definitions drift apart (e.g. RULE key naming differences).
-        const shared = await import('@zephyr/shared');
+        const shared = await import('@vela/shared');
         const sharedKeys = new Set(Object.keys(shared.COMMANDS));
         const localKeys = new Set(Object.keys(COMMANDS));
 
@@ -218,9 +218,9 @@ describe('UI → shared/index.js COMMANDS reference contract', () => {
 
         expect(
             onlyInLocal.length === 0 && onlyInShared.length === 0,
-            `COMMANDS definitions differ between _shared/index.js and @zephyr/shared:\n` +
+            `COMMANDS definitions differ between _shared/index.js and @vela/shared:\n` +
             (onlyInLocal.length > 0 ? `  Only in _shared: ${onlyInLocal.join(', ')}\n` : '') +
-            (onlyInShared.length > 0 ? `  Only in @zephyr/shared: ${onlyInShared.join(', ')}` : '')
+            (onlyInShared.length > 0 ? `  Only in @vela/shared: ${onlyInShared.join(', ')}` : '')
         ).toBe(true);
     });
 });

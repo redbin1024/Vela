@@ -11,7 +11,7 @@ import { showNotification } from './notifications.js';
 import { translations, currentLang } from '../i18n.js';
 import { saveSetting } from './settings-helpers.js';
 import { appStore } from './state.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 
 export function initTunToggle() {
     const toggle = /** @type {HTMLInputElement|null} */ (document.getElementById('tun-proxy-toggle'));

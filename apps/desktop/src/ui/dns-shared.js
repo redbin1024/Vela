@@ -13,7 +13,7 @@ import { dnsLogger } from '../utils/logger.js';
 import { showNotification } from './notifications.js';
 import { invalidateSettingsCache } from './cache.js';
 import { translations, currentLang } from '../i18n.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { createFocusTrap } from '../utils/focus-trap.js';
 import { Bus, Events } from './events.js';
 import { getSetting, saveSetting } from './settings-helpers.js';

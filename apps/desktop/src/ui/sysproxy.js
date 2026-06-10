@@ -10,7 +10,7 @@ import { showNotification } from './notifications.js';
 import { translations, currentLang } from '../i18n.js';
 import { updateTrayStatus } from './tray.js';
 import { appStore } from './state.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 
 export async function updateSysProxyUI() {
     const statusText = document.getElementById('proxy-status-text');

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="apps/desktop/src-tauri/icons/icon.png" alt="Zephyr - Modern Mihomo GUI Client Logo" width="128" height="128">
+<img src="apps/desktop/src-tauri/icons/icon.png" alt="Vela - Modern Mihomo GUI Client Logo" width="128" height="128">
 
-# Zephyr
+# Vela
 
 **安全至上 · 极简美学 · 轻量高效**
 
@@ -16,10 +16,10 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](#安装)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-24c8db)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-1.92+-orange)](https://www.rust-lang.org/)
-[![Release](https://img.shields.io/github/v/release/Juwan-Hwang/Zephyr)](https://github.com/Juwan-Hwang/Zephyr/releases)
+[![Release](https://img.shields.io/github/v/release/redbin1024/Vela)](https://github.com/redbin1024/Vela/releases)
 [![Security](https://img.shields.io/badge/Security-CodeQL%20%7C%20Semgrep%20%7C%20cargo--deny%20%7C%20Clippy-green)](#安全设计)
-[![Rust Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/rust-tests.json&query=$.message&label=Rust%20Tests&color=green)](https://github.com/Juwan-Hwang/Zephyr/actions)
-[![JS Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/js-tests.json&query=$.message&label=JS%20Tests&color=brightgreen)](https://github.com/Juwan-Hwang/Zephyr/actions)
+[![Rust Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/rust-tests.json&query=$.message&label=Rust%20Tests&color=green)](https://github.com/redbin1024/Vela/actions)
+[![JS Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/js-tests.json&query=$.message&label=JS%20Tests&color=brightgreen)](https://github.com/redbin1024/Vela/actions)
 
 
 </div>
@@ -28,7 +28,7 @@
 
 ## 项目状态
 
-Zephyr 的开发起因很简单：目前我还没有找到符合自己审美的 Mihomo/Clash GUI，所以就自己 vibe coding 了一个。
+Vela 的开发起因很简单：目前我还没有找到符合自己审美的 Mihomo/Clash GUI，所以就自己 vibe coding 了一个。
 
 这个项目首先服务于个人使用场景。它追求两件事：一个更顺眼的桌面代理管理界面，以及更清楚的安全边界，包括订阅下载、配置处理、文件写入、脚本执行、深链导入和更新校验。
 
@@ -38,22 +38,22 @@ Zephyr 的开发起因很简单：目前我还没有找到符合自己审美的 
 
 ## 截图
 
-![Zephyr 主页 - macOS 浅色模式 Mihomo 代理客户端界面](apps/desktop/assets/screenshot-home.png)
+![Vela 主页 - macOS 浅色模式 Mihomo 代理客户端界面](apps/desktop/assets/screenshot-home.png)
 
 <details>
 <summary>更多截图</summary>
 
 | 设置页面 | 深色模式 |
 |:---:|:---:|
-| ![Zephyr 设置页面 - 系统代理与 TUN 配置](apps/desktop/assets/screenshot-settings.png) | ![Zephyr 深色模式 - 代理节点管理界面](apps/desktop/assets/screenshot-dark.png) |
+| ![Vela 设置页面 - 系统代理与 TUN 配置](apps/desktop/assets/screenshot-settings.png) | ![Vela 深色模式 - 代理节点管理界面](apps/desktop/assets/screenshot-dark.png) |
 
 </details>
 
 ---
 
-## 为什么选择 Zephyr？
+## 为什么选择 Vela？
 
-Zephyr 不是"功能堆满就好"的客户端。它更关注三个方向：
+Vela 不是"功能堆满就好"的客户端。它更关注三个方向：
 
 - **视觉体验**：毛玻璃卡片、渐变图标、深色模式、动画细节和克制排版，让代理客户端不再像临时工具。
 - **安全边界**：对订阅、配置、脚本、文件、更新和深链入口做明确限制，减少代理客户端常见攻击面。
@@ -77,7 +77,7 @@ Zephyr 不是"功能堆满就好"的客户端。它更关注三个方向：
 
 ### Prism Engine
 
-Zephyr 内置基于 `clash-prism-*` crate 的规则引擎，用来增强 Mihomo 配置管理：
+Vela 内置基于 `clash-prism-*` crate 的规则引擎，用来增强 Mihomo 配置管理：
 
 - **声明式规则补丁**：`.prism.yaml` 支持 `$prepend`、`$append`、`$filter`、`$override` 和 `__when__` 条件
 - **规则库管理**：规则文件 CRUD、分组、导入、自动应用和文件监听
@@ -107,7 +107,7 @@ Zephyr 内置基于 `clash-prism-*` crate 的规则引擎，用来增强 Mihomo 
 - 全局快捷键：窗口显示、系统代理、TUN、代理模式切换
 - `clash://` 深链订阅导入
 - Windows UWP 环回免除
-- Mihomo 核心、GeoIP / GeoSite 数据和 Zephyr 客户端更新
+- Mihomo 核心、GeoIP / GeoSite 数据和 Vela 客户端更新
 - 开机自启、系统通知、配置目录打开
 
 ### UI / UX
@@ -140,9 +140,9 @@ Zephyr 内置基于 `clash-prism-*` crate 的规则引擎，用来增强 Mihomo 
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/Juwan-Hwang/Zephyr/releases) 下载对应平台的安装包。
+从 [GitHub Releases](https://github.com/redbin1024/Vela/releases) 下载对应平台的安装包。
 
-Zephyr 的发布包分为三类：
+Vela 的发布包分为三类：
 
 | 类型 | 说明 | 适用场景 |
 |:---:|------|---------|
@@ -152,7 +152,7 @@ Zephyr 的发布包分为三类：
 
 ### 便携版使用
 
-1. 下载 `Zephyr-windows-portable.zip` 或 `Zephyr-linux-portable.tar.gz`
+1. 下载 `Vela-windows-portable.zip` 或 `Vela-linux-portable.tar.gz`
 2. 解压到任意目录
 3. 确保目录中存在 `.portable` 标记文件
 4. 运行可执行文件
@@ -197,10 +197,10 @@ pnpm run check:i18n
 桌面包也可以单独执行：
 
 ```bash
-pnpm --filter @zephyr/desktop typecheck
-pnpm --filter @zephyr/desktop test
-pnpm --filter @zephyr/desktop lint
-pnpm --filter @zephyr/desktop build:css
+pnpm --filter @vela/desktop typecheck
+pnpm --filter @vela/desktop test
+pnpm --filter @vela/desktop lint
+pnpm --filter @vela/desktop build:css
 ```
 
 Rust 侧验证：
@@ -265,6 +265,6 @@ cargo clippy --all-targets --all-features
 
 **Conjured by Juwan**
 
-[Back to Top](#zephyr)
+[Back to Top](#vela)
 
 </div>

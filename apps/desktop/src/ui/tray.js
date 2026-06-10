@@ -12,7 +12,7 @@ import { trayLogger } from '../utils/logger.js';
 import { trayMenuCache, TRAY_CACHE_TTL, invalidateProxiesCache } from './cache.js';
 import { toError } from '../types/guards.js';
 import { appStore } from './state.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { invalidateRunConfigCache } from './run-config-cache.js';
 
 // --- Tray event listener cleanup ---

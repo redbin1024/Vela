@@ -1,12 +1,13 @@
 // Unterdrücke Warnings von veralteten Cocoa APIs
 #![allow(unexpected_cfgs)]
 #![allow(deprecated)]
+#![allow(clippy::needless_pass_by_value)]
 
 use tauri::{AppHandle, Runtime, WebviewWindow};
 
 #[cfg(target_os = "macos")]
 use cocoa::{
-    appkit::{NSWindow, NSWindowStyleMask, NSView, NSWindowTitleVisibility},
+    appkit::{NSWindowStyleMask, NSWindowTitleVisibility, NSWindow as _, NSView as _},
     base::id,
     foundation::NSPoint,
 };
@@ -50,10 +51,12 @@ pub fn enable_rounded_corners<R: Runtime>(
         window
             .with_webview(move |webview| {
                 #[cfg(target_os = "macos")]
-                unsafe {
+                {
+                    // macOS FFI: safely casting webview's window pointer
                     let ns_window = webview.ns_window() as id;
                     
-                    let mut style_mask = ns_window.styleMask();
+                    // SAFETY: calling styleMask FFI method on the window pointer
+                    let mut style_mask = unsafe { ns_window.styleMask() };
                     
                     // Add necessary styles for rounded corners
                     style_mask |= NSWindowStyleMask::NSFullSizeContentViewWindowMask;
@@ -62,13 +65,18 @@ pub fn enable_rounded_corners<R: Runtime>(
                     style_mask |= NSWindowStyleMask::NSMiniaturizableWindowMask;
                     style_mask |= NSWindowStyleMask::NSResizableWindowMask;
                     
-                    ns_window.setStyleMask_(style_mask);
-                    ns_window.setTitlebarAppearsTransparent_(cocoa::base::YES);
+                    // SAFETY: setting window mask FFI
+                    unsafe { ns_window.setStyleMask_(style_mask) };
+                    // SAFETY: setting window titlebar transparency FFI
+                    unsafe { ns_window.setTitlebarAppearsTransparent_(cocoa::base::YES) };
                     
-                    let content_view = ns_window.contentView();
-                    content_view.setWantsLayer(cocoa::base::YES);
+                    // SAFETY: getting window content view FFI
+                    let content_view = unsafe { ns_window.contentView() };
+                    // SAFETY: setting layer flag on content view FFI
+                    unsafe { content_view.setWantsLayer(cocoa::base::YES) };
                     
-                    position_traffic_lights(ns_window, config.offset_x, config.offset_y);
+                    // SAFETY: positioning traffic lights using FFI calls
+                    unsafe { position_traffic_lights(ns_window, config.offset_x, config.offset_y) };
                 }
             })
             .map_err(|e| e.to_string())?;
@@ -103,10 +111,12 @@ pub fn enable_modern_window_style<R: Runtime>(
         window
             .with_webview(move |webview| {
                 #[cfg(target_os = "macos")]
-                unsafe {
+                {
+                    // macOS FFI: safely casting webview's window pointer
                     let ns_window = webview.ns_window() as id;
                     
-                    let mut style_mask = ns_window.styleMask();
+                    // SAFETY: calling styleMask FFI method on the window pointer
+                    let mut style_mask = unsafe { ns_window.styleMask() };
                     
                     style_mask |= NSWindowStyleMask::NSFullSizeContentViewWindowMask;
                     style_mask |= NSWindowStyleMask::NSTitledWindowMask;
@@ -114,22 +124,33 @@ pub fn enable_modern_window_style<R: Runtime>(
                     style_mask |= NSWindowStyleMask::NSMiniaturizableWindowMask;
                     style_mask |= NSWindowStyleMask::NSResizableWindowMask;
                     
-                    ns_window.setStyleMask_(style_mask);
-                    ns_window.setTitlebarAppearsTransparent_(cocoa::base::YES);
-                    ns_window.setTitleVisibility_(NSWindowTitleVisibility::NSWindowTitleHidden);
-                    ns_window.setHasShadow_(cocoa::base::YES);
-                    ns_window.setOpaque_(cocoa::base::NO);
+                    // SAFETY: setting window mask FFI
+                    unsafe { ns_window.setStyleMask_(style_mask) };
+                    // SAFETY: setting window titlebar transparency FFI
+                    unsafe { ns_window.setTitlebarAppearsTransparent_(cocoa::base::YES) };
+                    // SAFETY: setting window title visibility FFI
+                    unsafe { ns_window.setTitleVisibility_(NSWindowTitleVisibility::NSWindowTitleHidden) };
+                    // SAFETY: setting window shadow flag FFI
+                    unsafe { ns_window.setHasShadow_(cocoa::base::YES) };
+                    // SAFETY: setting window opacity FFI
+                    unsafe { ns_window.setOpaque_(cocoa::base::NO) };
                     
-                    let content_view = ns_window.contentView();
-                    content_view.setWantsLayer(cocoa::base::YES);
+                    // SAFETY: getting window content view FFI
+                    let content_view = unsafe { ns_window.contentView() };
+                    // SAFETY: setting layer flag on content view FFI
+                    unsafe { content_view.setWantsLayer(cocoa::base::YES) };
                     
-                    let layer: id = msg_send![content_view, layer];
+                    // SAFETY: calling msg_send to get CALayer FFI
+                    let layer: id = unsafe { msg_send![content_view, layer] };
                     if !layer.is_null() {
-                        let _: () = msg_send![layer, setCornerRadius: radius];
-                        let _: () = msg_send![layer, setMasksToBounds: cocoa::base::YES];
+                        // SAFETY: setting layer corner radius FFI
+                        let _: () = unsafe { msg_send![layer, setCornerRadius: radius] };
+                        // SAFETY: setting layer masks to bounds FFI
+                        let _: () = unsafe { msg_send![layer, setMasksToBounds: cocoa::base::YES] };
                     }
                     
-                    position_traffic_lights(ns_window, config.offset_x, config.offset_y);
+                    // SAFETY: positioning traffic lights using FFI calls
+                    unsafe { position_traffic_lights(ns_window, config.offset_x, config.offset_y) };
                 }
             })
             .map_err(|e| e.to_string())?;
@@ -163,9 +184,11 @@ pub fn reposition_traffic_lights<R: Runtime>(
         window
             .with_webview(move |webview| {
                 #[cfg(target_os = "macos")]
-                unsafe {
+                {
+                    // macOS FFI: safely casting webview's window pointer
                     let ns_window = webview.ns_window() as id;
-                    position_traffic_lights(ns_window, config.offset_x, config.offset_y);
+                    // SAFETY: positioning traffic lights using FFI calls
+                    unsafe { position_traffic_lights(ns_window, config.offset_x, config.offset_y) };
                 }
             })
             .map_err(|e| e.to_string())?;

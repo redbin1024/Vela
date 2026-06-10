@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="apps/desktop/src-tauri/icons/icon.png" alt="Zephyr - Modern Mihomo GUI Client Logo" width="128" height="128">
+<img src="apps/desktop/src-tauri/icons/icon.png" alt="Vela - Modern Mihomo GUI Client Logo" width="128" height="128">
 
-# Zephyr - Modern Lightweight  Mihomo / Clash Meta GUI Client 
+# Vela - Modern Lightweight  Mihomo / Clash Meta GUI Client 
 
 **Security First · Minimalist Aesthetics · Lightweight & Efficient**
 
@@ -16,10 +16,10 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](#installation)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-24c8db)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-1.92+-orange)](https://www.rust-lang.org/)
-[![Release](https://img.shields.io/github/v/release/Juwan-Hwang/Zephyr)](https://github.com/Juwan-Hwang/Zephyr/releases)
+[![Release](https://img.shields.io/github/v/release/redbin1024/Vela)](https://github.com/redbin1024/Vela/releases)
 [![Security](https://img.shields.io/badge/Security-CodeQL%20%7C%20Semgrep%20%7C%20cargo--deny%20%7C%20Clippy-green)](#security-features)
-[![Rust Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/rust-tests.json&query=$.message&label=Rust%20Tests&color=green)](https://github.com/Juwan-Hwang/Zephyr/actions)
-[![JS Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/js-tests.json&query=$.message&label=JS%20Tests&color=brightgreen)](https://github.com/Juwan-Hwang/Zephyr/actions)
+[![Rust Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/rust-tests.json&query=$.message&label=Rust%20Tests&color=green)](https://github.com/redbin1024/Vela/actions)
+[![JS Tests](https://img.shields.io/badge/dynamic/json?url=https://gist.githubusercontent.com/Juwan-Hwang/6f7cfd1b6927a9a224ffe8cb21f5e9d4/raw/js-tests.json&query=$.message&label=JS%20Tests&color=brightgreen)](https://github.com/redbin1024/Vela/actions)
 
 
 </div>
@@ -28,7 +28,7 @@
 
 ## Project Status
 
-Zephyr was created for a simple reason: I couldn't find a Mihomo GUI that matched my aesthetic preferences, so I built one.
+Vela was created for a simple reason: I couldn't find a Mihomo GUI that matched my aesthetic preferences, so I built one.
 
 This project primarily serves my personal use cases. It pursues two things: a more pleasing desktop proxy management interface, and clearer security boundaries—including subscription downloads, configuration handling, file writes, script execution, deep link imports, and update verification.
 
@@ -38,22 +38,22 @@ This project primarily serves my personal use cases. It pursues two things: a mo
 
 ## Screenshots
 
-![Zephyr Home - macOS Light Mode Mihomo Proxy Client Interface](apps/desktop/assets/screenshot-home.png)
+![Vela Home - macOS Light Mode Mihomo Proxy Client Interface](apps/desktop/assets/screenshot-home.png)
 
 <details>
 <summary>More Screenshots</summary>
 
 | Settings Page | Dark Mode |
 |:---:|:---:|
-| ![Zephyr Settings - System Proxy and TUN Configuration](apps/desktop/assets/screenshot-settings.png) | ![Zephyr Dark Mode - Proxy Node Management Interface](apps/desktop/assets/screenshot-dark.png) |
+| ![Vela Settings - System Proxy and TUN Configuration](apps/desktop/assets/screenshot-settings.png) | ![Vela Dark Mode - Proxy Node Management Interface](apps/desktop/assets/screenshot-dark.png) |
 
 </details>
 
 ---
 
-## Why Zephyr?
+## Why Vela?
 
-Zephyr is not a "more features is better" client. It focuses on three directions:
+Vela is not a "more features is better" client. It focuses on three directions:
 
 - **Visual Experience**: Glassmorphism cards, gradient icons, dark mode, animation details, and restrained typography—making proxy clients feel less like temporary tools.
 - **Security Boundaries**: Clear restrictions on subscriptions, configurations, scripts, files, updates, and deep link entry points—reducing common attack surfaces in proxy clients.
@@ -77,7 +77,7 @@ See [FEATURES.md](FEATURES.md) for the complete feature list.
 
 ### Prism Engine
 
-Zephyr includes a rule engine based on `clash-prism-*` crates to enhance Mihomo configuration management:
+Vela includes a rule engine based on `clash-prism-*` crates to enhance Mihomo configuration management:
 
 - **Declarative Rule Patches**: `.prism.yaml` supports `$prepend`, `$append`, `$filter`, `$override`, and `__when__` conditions
 - **Rule Library Management**: Rule file CRUD, grouping, import, auto-apply, and file watching
@@ -107,7 +107,7 @@ Zephyr includes a rule engine based on `clash-prism-*` crates to enhance Mihomo 
 - Global hotkeys: Window show, system proxy, TUN, proxy mode switching
 - `clash://` deep link subscription import
 - Windows UWP loopback exemption
-- Mihomo core, GeoIP/GeoSite data, and Zephyr client updates
+- Mihomo core, GeoIP/GeoSite data, and Vela client updates
 - Auto-start on boot, system notifications, config directory opening
 
 ### UI / UX
@@ -140,9 +140,9 @@ Zephyr includes a rule engine based on `clash-prism-*` crates to enhance Mihomo 
 
 ## Installation
 
-Download the appropriate package for your platform from [GitHub Releases](https://github.com/Juwan-Hwang/Zephyr/releases).
+Download the appropriate package for your platform from [GitHub Releases](https://github.com/redbin1024/Vela/releases).
 
-Zephyr releases come in three types:
+Vela releases come in three types:
 
 | Type | Description | Use Case |
 |:---:|------|---------|
@@ -152,7 +152,7 @@ Zephyr releases come in three types:
 
 ### Portable Version Usage
 
-1. Download `Zephyr-windows-portable.zip` or `Zephyr-linux-portable.tar.gz`
+1. Download `Vela-windows-portable.zip` or `Vela-linux-portable.tar.gz`
 2. Extract to any directory
 3. Ensure `.portable` marker file exists in the directory
 4. Run the executable
@@ -197,10 +197,10 @@ pnpm run check:i18n
 Desktop package can also be run separately:
 
 ```bash
-pnpm --filter @zephyr/desktop typecheck
-pnpm --filter @zephyr/desktop test
-pnpm --filter @zephyr/desktop lint
-pnpm --filter @zephyr/desktop build:css
+pnpm --filter @vela/desktop typecheck
+pnpm --filter @vela/desktop test
+pnpm --filter @vela/desktop lint
+pnpm --filter @vela/desktop build:css
 ```
 
 Rust-side verification:
@@ -265,6 +265,6 @@ This project uses the [MIT License](LICENSE).
 
 **Conjured by Juwan**
 
-[Back to Top](#zephyr---modern-lightweight-mihomo-gui-client)
+[Back to Top](#vela---modern-lightweight-mihomo-gui-client)
 
 </div>

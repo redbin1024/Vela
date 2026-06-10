@@ -3,53 +3,6 @@
 version = 4
 
 [[package]]
-name = "Zephyr"
-version = "1.2.0"
-dependencies = [
- "aes-gcm",
- "base64 0.22.1",
- "chrono",
- "clash-prism-core",
- "clash-prism-extension",
- "clash-prism-plugin",
- "clash-prism-script",
- "clash-prism-smart",
- "cocoa",
- "flate2",
- "futures-util",
- "glib 0.22.7",
- "hex",
- "hmac",
- "mockall",
- "objc",
- "pbkdf2",
- "rand 0.10.1",
- "regex",
- "reqwest",
- "serde",
- "serde_json",
- "serde_yaml_ng",
- "sha2",
- "tar",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-dialog",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-notification",
- "tauri-plugin-opener",
- "tauri-plugin-single-instance",
- "tempfile",
- "tokio",
- "toml 1.1.2+spec-1.1.0",
- "url",
- "uuid",
- "windows-sys 0.59.0",
- "winreg 0.52.0",
- "zip",
-]
-
-[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5745,6 +5698,53 @@ dependencies = [
  "js-sys",
  "serde_core",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "vela"
+version = "1.2.0"
+dependencies = [
+ "aes-gcm",
+ "base64 0.22.1",
+ "chrono",
+ "clash-prism-core",
+ "clash-prism-extension",
+ "clash-prism-plugin",
+ "clash-prism-script",
+ "clash-prism-smart",
+ "cocoa",
+ "flate2",
+ "futures-util",
+ "glib 0.22.7",
+ "hex",
+ "hmac",
+ "mockall",
+ "objc",
+ "pbkdf2",
+ "rand 0.10.1",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_yaml_ng",
+ "sha2",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-dialog",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-notification",
+ "tauri-plugin-opener",
+ "tauri-plugin-single-instance",
+ "tempfile",
+ "tokio",
+ "toml 1.1.2+spec-1.1.0",
+ "url",
+ "uuid",
+ "windows-sys 0.59.0",
+ "winreg 0.52.0",
+ "zip",
 ]
 
 [[package]]

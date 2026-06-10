@@ -485,7 +485,7 @@ pub struct ClientVersions {
 #[command]
 pub async fn get_latest_client_versions() -> Result<ClientVersions, String> {
     let client = reqwest::Client::builder()
-        .user_agent("Zephyr/Update-Checker")
+        .user_agent("Vela/Update-Checker")
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .map_err(|e| e.to_string())?;
@@ -1041,7 +1041,7 @@ pub async fn update_geo_data(window: Window) -> Result<String, String> {
 //  Client (Zephyr) self-update
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const ZEPHYR_RELEASE_API: &str = "https://api.github.com/repos/Juwan-Hwang/Zephyr/releases/latest";
+const VELA_RELEASE_API: &str = "https://api.github.com/repos/redbin1024/Vela/releases/latest";
 
 /// Release info returned to the frontend for Zephyr client updates.
 #[derive(Debug, Serialize)]
@@ -1097,16 +1097,16 @@ fn select_client_asset(assets: &[GithubAsset]) -> Result<&GithubAsset, String> {
     Err("No suitable installer asset found for this platform".to_owned())
 }
 
-/// Check for the latest Zephyr client version.
+/// Check for the latest Vela client version.
 #[command]
 pub async fn get_latest_client_version() -> Result<ClientUpdateInfo, String> {
     let client = build_github_client()?;
 
     let response = client
-        .get(ZEPHYR_RELEASE_API)
+        .get(VELA_RELEASE_API)
         .send()
         .await
-        .map_err(|e| format!("Failed to fetch Zephyr release info: {e}"))?;
+        .map_err(|e| format!("Failed to fetch Vela release info: {e}"))?;
 
     if !response.status().is_success() {
         return Err(format!("GitHub API returned status: {}", response.status()));
@@ -1115,11 +1115,11 @@ pub async fn get_latest_client_version() -> Result<ClientUpdateInfo, String> {
     let release: GithubRelease = response
         .json()
         .await
-        .map_err(|e| format!("Failed to parse Zephyr release info: {e}"))?;
+        .map_err(|e| format!("Failed to parse Vela release info: {e}"))?;
 
     let asset = select_client_asset(&release.assets)?;
     let download_url = format!(
-        "https://github.com/Juwan-Hwang/Zephyr/releases/download/{}/{}",
+        "https://github.com/redbin1024/Vela/releases/download/{}/{}",
         release.tag_name, asset.name
     );
 
@@ -1141,7 +1141,7 @@ pub async fn update_client(window: Window) -> Result<String, String> {
         return Err("Portable version does not support self-update. Please download the latest release manually.".to_owned());
     }
 
-    emit_core_download_status(&window, "Checking for Zephyr updates...", 5);
+    emit_core_download_status(&window, "Checking for Vela updates...", 5);
 
     let info = get_latest_client_version().await?;
 
@@ -1151,10 +1151,10 @@ pub async fn update_client(window: Window) -> Result<String, String> {
         return Ok("Already up to date".to_owned());
     }
 
-    emit_core_download_status(&window, "Downloading Zephyr update...", 10);
+    emit_core_download_status(&window, "Downloading Vela update...", 10);
 
     // Create temp directory for the installer
-    let temp_dir = std::env::temp_dir().join(format!("zephyr_update_{}", uuid::Uuid::new_v4()));
+    let temp_dir = std::env::temp_dir().join(format!("vela_update_{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&temp_dir).map_err(|e| format!("Failed to create temp dir: {e}"))?;
 
     // Determine file extension from download URL
@@ -1162,7 +1162,7 @@ pub async fn update_client(window: Window) -> Result<String, String> {
         .download_url
         .rsplit('/')
         .next()
-        .unwrap_or("Zephyr-installer");
+        .unwrap_or("Vela-installer");
     let dest_path = temp_dir.join(asset_name);
 
     // Download the installer
@@ -1198,7 +1198,7 @@ pub async fn update_client(window: Window) -> Result<String, String> {
     emit_core_download_status(&window, "Installer launched", 100);
 
     Ok(format!(
-        "Zephyr {} installer downloaded and opened",
+        "Vela {} installer downloaded and opened",
         info.version
     ))
 }

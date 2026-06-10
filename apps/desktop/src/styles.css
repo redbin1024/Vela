@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@config "../tailwind.config.js";
+
 html, body {
   background: transparent !important;
   background-color: transparent !important;
@@ -36,16 +42,11 @@ html:not(.dark) * {
   --ui-scale: 1;
 }
 
-@import "tailwindcss";
-
-@config "../tailwind.config.js";
-
-/* ── Font stack with Linux fallbacks ── */
+/* ── Font stack with Google Fonts ── */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif,
-    "Noto Sans", "DejaVu Sans", "WenQuanYi Micro Hei",
-    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif,
+    "Noto Sans", "DejaVu Sans", "WenQuanYi Micro Hei";
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "DejaVu Sans Mono", "Ubuntu Mono",
     "Courier New", monospace;
   --color-accent: var(--accent-primary);
@@ -495,9 +496,11 @@ html.dark .glass-card:hover {
 }
 
 html:not(.dark) #app-main-container {
-  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 0%, transparent 60%), rgba(255, 255, 255, var(--app-opacity, 0.4));
-  border-color: rgba(15, 23, 42, 0.04);
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+  background: radial-gradient(circle at 50% 0%, rgba(175, 82, 222, 0.06) 0%, transparent 60%),
+              radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.03) 0%, transparent 40%),
+              linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
 }
 
 html:not(.dark) .glass-card {
@@ -551,7 +554,7 @@ html:not(.dark) .active\:bg-white\/\[0\.06\]:active {
 html:not(.dark) {
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-tertiary: #94a3b8;
+  --text-tertiary: #64748b;
 }
 
 html:not(.dark) .text-white {
@@ -757,17 +760,19 @@ html:not(.dark) .script-output {
 
 /* Light mode overrides for custom dropdown menus */
 html:not(.dark) [id$="-menu"] {
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
   border-radius: 14px;
-  box-shadow: 10px 10px 10px 0 rgba(0, 0, 0, 0.08);
   padding: 12px 16px;
 }
 html:not(.dark) [id$="-menu"] button:hover {
-  background: rgba(0, 0, 0, 0.035);
+  background: rgba(0, 0, 0, 0.035) !important;
 }
 html:not(.dark) [id$="-menu"] button.active {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Shortcut dropdown menu — dark mode base */
@@ -815,9 +820,9 @@ html:not(.dark) .input-common,
 html:not(.dark) .input-mono,
 html:not(.dark) .input-modal,
 html:not(.dark) .textarea-common {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-color: rgba(30, 41, 59, 0.1);
-  color: #334155;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(30, 41, 59, 0.12);
+  color: #0f172a;
 }
 
 html:not(.dark) .select-common:focus,
@@ -833,7 +838,7 @@ html:not(.dark) .input-common::placeholder,
 html:not(.dark) .input-mono::placeholder,
 html:not(.dark) .input-modal::placeholder,
 html:not(.dark) .textarea-common::placeholder {
-  color: #94a3b8;
+  color: #64748b;
 }
 
 /* ============================================
@@ -1270,3 +1275,136 @@ html.dark #fullscreen-editor-title {
 html.dark #fullscreen-editor-output {
     color: #a1a1aa;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CleanMyMac Theme Overrides (暗黑毛玻璃风格改造)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 1. 极光微光渐变背景 */
+html.dark #app-main-container {
+    background: radial-gradient(circle at 50% 0%, rgba(175, 82, 222, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 10% 90%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #181530 0%, #111424 50%, #0c0d16 100%) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 2. 玻璃态卡片增强 (更通透、大模糊) */
+html.dark .glass-card {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)) !important;
+    backdrop-filter: blur(28px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+html.dark .glass-card:hover {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45) !important;
+    transform: translateY(-2.5px) !important;
+}
+
+/* 3. 侧边栏整体背景与左边控制面板风格统一 */
+html.dark nav[aria-label="Main navigation"] {
+    background: transparent !important;
+    border-right: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html:not(.dark) nav[aria-label="Main navigation"] {
+    background: transparent !important;
+    border-right: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 4. 侧边导航激活项 (CleanMyMac 侧边微光 + 呼吸圆点) */
+html.dark [data-nav][aria-current="page"] {
+    background: linear-gradient(90deg, rgba(175, 82, 222, 0.2) 0%, rgba(175, 82, 222, 0.05) 100%) !important;
+    color: #ffffff !important;
+    border-right: 3px solid var(--color-accent, #af52de) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 0 16px rgba(175, 82, 222, 0.15) !important;
+    position: relative !important;
+}
+
+html.dark [data-nav][aria-current="page"]::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--color-accent, #af52de);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--color-accent, #af52de);
+}
+
+html:not(.dark) [data-nav][aria-current="page"] {
+    background: color-mix(in srgb, var(--color-accent, #af52de) 12%, transparent) !important;
+    color: var(--color-accent, #af52de) !important;
+    border-right: 3px solid var(--color-accent, #af52de) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    position: relative !important;
+}
+
+html:not(.dark) [data-nav][aria-current="page"]::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--color-accent, #af52de);
+    border-radius: 50%;
+    box-shadow: 0 0 4px var(--color-accent-glow);
+}
+
+/* 5. 按钮系统拟物渐变增强 */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-accent) 0%, color-mix(in srgb, var(--color-accent) 70%, #000) 100%) !important;
+    box-shadow: 0 4px 12px var(--color-accent-glow) !important;
+    border: none !important;
+    color: #fff !important;
+    transition: all 0.21s ease-out !important;
+}
+.btn-primary:hover {
+    opacity: 0.95 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px var(--color-accent-glow) !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f43f5e 0%, #be185d 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2) !important;
+    transition: all 0.21s ease-out !important;
+}
+.btn-danger:hover {
+    opacity: 0.95 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.35) !important;
+}
+
+/* 6. 输入框发光对焦 */
+.input-common:focus, .input-modal:focus, .input-mono:focus {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 10px var(--color-accent-glow) !important;
+}
+
+/* 7. 下拉和弹出框毛玻璃化 */
+[id$="-menu"], .shortcut-dropdown-menu {
+    background-color: rgba(24, 24, 37, 0.85) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+

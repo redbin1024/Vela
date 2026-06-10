@@ -7,7 +7,7 @@
  */
 
 import { abortLatencyTests, closeAllConnections, restartCore, invoke } from '../api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { appStore } from './state.js';
 import { invalidateSettingsCache, invalidateProxiesCache, invalidateConfigCache } from './cache.js';
 import { invalidateRunConfigCache } from './run-config-cache.js';

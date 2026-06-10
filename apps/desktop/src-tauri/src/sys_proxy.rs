@@ -112,7 +112,7 @@ fn run_networksetup(args: &[&str]) -> Result<(), String> {
     if status.success() {
         Ok(())
     } else {
-        Err(format!("networksetup failed: {:?}", args))
+        Err(format!("networksetup failed: {args:?}"))
     }
 }
 
@@ -164,6 +164,7 @@ where
     F: Fn(&str) -> Result<(), String> + Send + Sync + 'static,
 {
     let services = get_network_services();
+    #[allow(clippy::shadow_reuse)]
     let op = std::sync::Arc::new(op);
     let mut handles = Vec::new();
 
@@ -485,7 +486,6 @@ pub fn enable_sysproxy(server: String, bypass: Option<String>) -> Result<String,
     {
         let (host, port) = parse_host_port(&server)?;
         validate_proxy_server(&server)?;
-        let bypass_clone = bypass.clone();
         apply_networksetup_for_services(move |service| {
             // HTTP 代理
             run_networksetup(&["-setwebproxy", service, &host, &port])?;
@@ -497,12 +497,12 @@ pub fn enable_sysproxy(server: String, bypass: Option<String>) -> Result<String,
             run_networksetup(&["-setsocksfirewallproxy", service, &host, &port])?;
             run_networksetup(&["-setsocksfirewallproxystate", service, "on"])?;
             // 代理绕过列表
-            if let Some(ref bp) = bypass_clone {
+            if let Some(bp) = &bypass {
                 run_networksetup(&["-setproxybypassdomains", service, bp])?;
             }
             Ok(())
         })?;
-        Ok(format!("System proxy enabled on macOS (HTTP+HTTPS+SOCKS)"))
+        Ok("System proxy enabled on macOS (HTTP+HTTPS+SOCKS)".to_owned())
     }
 
     #[cfg(target_os = "linux")]
@@ -709,9 +709,9 @@ pub fn get_sys_proxy_address() -> Option<String> {
                     if trimmed.starts_with("Enabled:") {
                         enabled = trimmed.contains("Yes");
                     } else if trimmed.starts_with("Server:") {
-                        host = trimmed.split(':').nth(1).unwrap_or("").trim().to_owned();
+                        trimmed.split(':').nth(1).unwrap_or("").trim().clone_into(&mut host);
                     } else if trimmed.starts_with("Port:") {
-                        port = trimmed.split(':').nth(1).unwrap_or("").trim().to_owned();
+                        trimmed.split(':').nth(1).unwrap_or("").trim().clone_into(&mut port);
                     }
                 }
 

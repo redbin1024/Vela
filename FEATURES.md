@@ -55,7 +55,7 @@
 - **Global Shortcuts** — 6 configurable actions (toggle-window, toggle-proxy, toggle-tun, mode-rule, mode-global, mode-direct), platform-aware display (⌘ vs Ctrl)
 - **Deep Link** — `clash://` protocol association for subscription import
 - **UWP Loopback Exemption** — Allow Windows Store apps to access local proxy (with user confirmation + cooldown)
-- **Auto-update** — Mihomo core, GeoIP/GeoSite databases, Zephyr client; download progress reporting
+- **Auto-update** — Mihomo core, GeoIP/GeoSite databases, Vela client; download progress reporting
 - **Auto-start** — Launch on system startup via `tauri-plugin-autostart`
 - **OS Notifications** — System-level notifications with correct app identity (AUMID)
 - **File Manager Integration** — Open config/Prism folders in system file manager

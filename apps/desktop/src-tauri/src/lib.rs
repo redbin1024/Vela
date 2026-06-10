@@ -577,12 +577,12 @@ pub fn run() {
         .manage(RateLimiter::new())
         .manage(ShortcutRegistry::default())
         .setup(|app| {
-            // Set AppUserModelId on Windows so notifications show "Zephyr" instead of "Windows PowerShell"
+            // Set AppUserModelId on Windows so notifications show "Vela" instead of "Windows PowerShell"
             #[cfg(target_os = "windows")]
             {
                 use std::ffi::OsStr;
                 use std::os::windows::ffi::OsStrExt as _;
-                let app_id: Vec<u16> = OsStr::new("com.zephyr.desktop")
+                let app_id: Vec<u16> = OsStr::new("com.vela.desktop")
                     .encode_wide()
                     .chain(std::iter::once(0))
                     .collect();
@@ -917,7 +917,7 @@ pub fn run() {
             }
             #[cfg(target_os = "macos")]
             let is_suid = if let Ok(paths) = core_manager::resolve_app_paths(handle) {
-                core_manager::core::tun_manager::check_mihomo_suid(&paths.core_dir.join("mihomo"))
+                core_manager::core::tun_manager::check_mihomo_suid(paths.core_dir.join("mihomo"))
             } else {
                 false
             };

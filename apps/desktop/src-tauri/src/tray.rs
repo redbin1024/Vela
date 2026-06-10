@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 //! Tray icon and menu management
 //!
 //! This module handles:
@@ -193,12 +194,12 @@ pub fn init_tray(app: &AppHandle) -> Result<(), String> {
         .on_menu_event(|app, event| {
             handle_menu_event(app, event.id.as_ref());
         })
-        .on_tray_icon_event(|tray, event| {
+        .on_tray_icon_event(|_tray, _event| {
             #[cfg(not(target_os = "macos"))]
-            if let tauri::tray::TrayIconEvent::Click { button, .. } = event {
+            if let tauri::tray::TrayIconEvent::Click { button, .. } = _event {
                 if button == tauri::tray::MouseButton::Left {
                     // Left click: show main window
-                    let app = tray.app_handle();
+                    let app = _tray.app_handle();
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.set_focus();
@@ -334,16 +335,16 @@ pub struct TrayMenuParams {
 #[tauri::command]
 #[allow(clippy::needless_pass_by_value)]
 pub fn update_tray_full_menu(app: AppHandle, params: TrayMenuParams) -> Result<(), String> {
-    match update_tray_full_menu_inner(app.clone(), params) {
+    match update_tray_full_menu_inner(app, &params) {
         Ok(_) => Ok(()),
         Err(e) => {
-            eprintln!("[TrayError] Failed to update tray full menu: {}", e);
+            eprintln!("[TrayError] Failed to update tray full menu: {e}");
             Err(e)
         }
     }
 }
 
-fn update_tray_full_menu_inner(app: AppHandle, params: TrayMenuParams) -> Result<(), String> {
+fn update_tray_full_menu_inner(app: AppHandle, params: &TrayMenuParams) -> Result<(), String> {
     let tray = app
         .tray_by_id("main")
         .ok_or_else(|| "Tray icon not found".to_owned())?;

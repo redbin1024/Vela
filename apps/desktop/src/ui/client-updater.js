@@ -9,7 +9,7 @@
 import { invoke, listen } from '../api.js';
 import { showNotification, showUpdateNotesModal } from './notifications.js';
 import { translations } from '../i18n.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { apiLogger } from '../utils/logger.js';
 
 /** P3: Guard flag to prevent concurrent update checks. */

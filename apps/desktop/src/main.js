@@ -24,7 +24,7 @@ import { initChart, updateTrafficData, cleanupChart } from './modules/traffic-ch
 import { initConnectionsPage } from './modules/connections.js';
 import { apiLogger } from './utils/logger.js';
 import { registerCleanup, runCleanup } from './utils/cleanup-registry.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import * as prism from './ui/prism.js';
 
 // --- UI module imports ---
@@ -84,9 +84,16 @@ function initReactiveBindings() {
   }
 
   // --- Tray auto-update on state changes ---
-  appStore.subscribe('isSysProxyEnabled', () => updateTrayStatus().catch(() => {}));
-  appStore.subscribe('isTunEnabled', () => updateTrayStatus().catch(() => {}));
+  appStore.subscribe('isSysProxyEnabled', () => {
+    updateTrayStatus().catch(() => {});
+    updateTrayMenu(true).catch(() => {});
+  });
+  appStore.subscribe('isTunEnabled', () => {
+    updateTrayStatus().catch(() => {});
+    updateTrayMenu(true).catch(() => {});
+  });
   appStore.subscribe('currentOutboundMode', () => updateTrayMenu(true).catch(() => {}));
+  appStore.subscribe('currentLang', () => updateTrayMenu(true).catch(() => {}));
 
   // --- Bus event -> store wiring (for events from settings.js, i18n.js) ---
   Bus.on(Events.MODE_CHANGED, /** @param {string} mode */ (mode) => {
@@ -108,7 +115,7 @@ function initReactiveBindings() {
 
 async function initApp() {
   const t0 = performance.now();
-  apiLogger.info(`[Zephyr] initApp started at ${new Date().toLocaleTimeString()}`);
+  apiLogger.info(`[Vela] initApp started at ${new Date().toLocaleTimeString()}`);
 
   // 1. Disable context menu globally (except on draggable titlebar)
   document.addEventListener('contextmenu', (e) => {
@@ -131,7 +138,7 @@ async function initApp() {
 
   // 3b. Enable macOS Native Rounded Corners & Shadows
   enableModernWindowStyle({
-    cornerRadius: 12,
+    cornerRadius: 24,
     offsetX: 0,
     offsetY: 0
   }).catch(err => apiLogger.warn('Failed to enable macOS rounded corners', err));
@@ -153,7 +160,7 @@ async function initApp() {
   try {
     const tGetSettings = performance.now();
     const settings = await invoke(COMMANDS.GET_SETTINGS);
-    apiLogger.info(`[Zephyr] get_settings: +${(performance.now() - tGetSettings).toFixed(0)}ms`);
+    apiLogger.info(`[Vela] get_settings: +${(performance.now() - tGetSettings).toFixed(0)}ms`);
 
     // Apply saved UI scale early (before UI renders)
     if (settings.ui_scale && settings.ui_scale > 0 && settings.ui_scale !== 1) {
@@ -163,14 +170,14 @@ async function initApp() {
     const tStartCore = performance.now();
     configPath = settings.last_config || 'config.yaml';
     customArgs = settings.custom_args || [];
-    apiLogger.info(`[Zephyr] calling start_core (config=${configPath})`);
+    apiLogger.info(`[Vela] calling start_core (config=${configPath})`);
     const coreResult = await invoke(COMMANDS.START_CORE, {
       configPath,
       test: false,
       customArgs,
       secret: null,
     });
-    apiLogger.info(`[Zephyr] start_core: +${(performance.now() - tStartCore).toFixed(0)}ms`);
+    apiLogger.info(`[Vela] start_core: +${(performance.now() - tStartCore).toFixed(0)}ms`);
 
     secret = coreResult.secret;
     const port = coreResult.port;
@@ -190,16 +197,16 @@ async function initApp() {
         const stats = applyResult?.stats;
         const annotationCount = applyResult?.rule_annotations?.length ?? 0;
         apiLogger.info(
-            `[Zephyr] prism.apply: +${elapsed}ms | patches=${stats?.succeeded ?? '?'}/${stats?.total ?? '?'} | annotations=${annotationCount}`
+            `[Vela] prism.apply: +${elapsed}ms | patches=${stats?.succeeded ?? '?'}/${stats?.total ?? '?'} | annotations=${annotationCount}`
         );
         if (annotationCount === 0 && (stats?.total ?? 0) > 0) {
             apiLogger.warn(
-                '[Zephyr] prism.apply succeeded but produced 0 rule annotations.',
+                '[Vela] prism.apply succeeded but produced 0 rule annotations.',
                 'Check that .prism.yaml files use $prepend/$append DSL syntax.',
             );
         }
     }).catch((err) => {
-        apiLogger.warn('[Zephyr] prism.apply failed (non-fatal, rules page may be empty):', err);
+        apiLogger.warn('[Vela] prism.apply failed (non-fatal, rules page may be empty):', err);
     });
 
     // 5c. Apply all enabled overrides (JS + Prism YAML).
@@ -209,10 +216,10 @@ async function initApp() {
         const successCount = logs?.filter((/** @type {{success: boolean}} */ l) => l.success).length ?? 0;
         const failCount = logs?.filter((/** @type {{success: boolean}} */ l) => !l.success).length ?? 0;
         if (logs && logs.length > 0) {
-            apiLogger.info(`[Zephyr] override_apply_all: ${successCount} succeeded, ${failCount} failed (${logs.length} total)`);
+            apiLogger.info(`[Vela] override_apply_all: ${successCount} succeeded, ${failCount} failed (${logs.length} total)`);
         }
     }).catch((err) => {
-        apiLogger.warn('[Zephyr] override_apply_all failed (non-fatal):', err);
+        apiLogger.warn('[Vela] override_apply_all failed (non-fatal):', err);
     });
   } catch (err) {
     const message = err?.toString?.() || 'Core start failed';
@@ -291,7 +298,7 @@ async function initApp() {
     apiLogger.warn('Failed to register default shortcuts', err);
   });
 
-  apiLogger.info(`[Zephyr] UI modules: +${(performance.now() - tUI).toFixed(0)}ms`);
+  apiLogger.info(`[Vela] UI modules: +${(performance.now() - tUI).toFixed(0)}ms`);
 
   // 7. Check encryption key persistence
   try {
@@ -392,7 +399,7 @@ async function initApp() {
 
   window.addEventListener('beforeunload', () => runCleanup());
 
-  apiLogger.info(`[Zephyr] ✅ App ready! Total: ${(performance.now() - t0).toFixed(0)}ms`);
+  apiLogger.info(`[Vela] ✅ App ready! Total: ${(performance.now() - t0).toFixed(0)}ms`);
 }
 
 // ═══════════════════════════════════════════════════════════════════

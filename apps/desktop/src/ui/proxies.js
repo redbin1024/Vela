@@ -17,7 +17,7 @@ import { showNotification } from './notifications.js';
 import { SVG_ICONS } from './icons.js';
 import { setup3DEffect, setup3DEffectForContainer } from './3d-effect.js';
 import { createRovingTabindex } from '../utils/roving-tabindex.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { getConfigCached, getProxiesCached, getSettingsCached, invalidateProxiesCache } from './cache.js';
 import { appStore } from './state.js';
 import { smartScore, smartNextInterval, smartSelectBest, smartRank, smartConfig } from './prism.js';

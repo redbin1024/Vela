@@ -7,7 +7,7 @@
  */
 
 import { getConfig, getProxies, invoke } from '../api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 
 // --- API Cache (LRU + Stale-While-Revalidate) ---
 

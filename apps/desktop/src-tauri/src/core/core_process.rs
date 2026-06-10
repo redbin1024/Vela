@@ -313,10 +313,10 @@ pub fn ensure_executable(path: &Path) -> Result<(), String> {
         Ok(_) => Ok(()),
         Err(e) => {
             // If we get PermissionDenied/EPERM but the file is already executable by owner, ignore
-            if e.kind() == std::io::ErrorKind::PermissionDenied || e.raw_os_error() == Some(1) {
-                if (mode & 0o100) != 0 {
-                    return Ok(());
-                }
+            if (e.kind() == std::io::ErrorKind::PermissionDenied || e.raw_os_error() == Some(1))
+                && (mode & 0o100) != 0
+            {
+                return Ok(());
             }
             Err(format!("Failed to set executable permissions: {e}"))
         }

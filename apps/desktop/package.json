@@ -1,5 +1,5 @@
 {
-  "name": "@zephyr/desktop",
+  "name": "@vela/desktop",
   "private": true,
   "version": "1.2.0",
   "type": "module",
@@ -23,7 +23,7 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.42.1",
     "@tauri-apps/plugin-autostart": "2.5.1",
-    "@zephyr/shared": "workspace:*"
+    "@vela/shared": "workspace:*"
   },
   "devDependencies": {
     "esbuild": "^0.28.0",

@@ -4,7 +4,7 @@
  */
 import { invoke } from './api.js';
 import { rulesLogger } from './utils/logger.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 
 /**
  * @param {string} url

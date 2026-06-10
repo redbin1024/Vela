@@ -15,7 +15,7 @@ import {
     abortLatencyTests,
 } from '../../api.js';
 import { switchToConfig } from '../lifecycle.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { translations } from '../../i18n.js';
 import { rulesLogger } from '../../utils/logger.js';
 import { showNotification, showModal, showConfirmModal } from '../notifications.js';

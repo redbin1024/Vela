@@ -11,7 +11,7 @@
  */
 
 import { invoke } from '../api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 
 /** Cached trace from the last apply() call. Updated automatically. */
 let _lastTrace = [];

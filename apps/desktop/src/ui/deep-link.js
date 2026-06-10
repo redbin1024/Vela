@@ -9,7 +9,7 @@
 import { listen, invoke } from '../api.js';
 import { showNotification, showConfirmModal } from './notifications.js';
 import { translations } from '../i18n.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { apiLogger } from '../utils/logger.js';
 
 /**

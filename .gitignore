@@ -70,4 +70,4 @@ id_ed25519*
 *.der
 
 .claude/
-
+.agent/

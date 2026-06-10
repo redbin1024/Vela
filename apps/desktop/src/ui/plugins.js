@@ -464,7 +464,7 @@ function openScopeEditor(overrideId, currentGlobal, currentProfileIds) {
         let configs = [];
         try {
             const { invoke } = await import('../api.js');
-            const { COMMANDS } = await import('@zephyr/shared');
+            const { COMMANDS } = await import('@vela/shared');
             configs = await invoke(COMMANDS.LIST_CONFIGS) ?? [];
         } catch { configs = []; }
 

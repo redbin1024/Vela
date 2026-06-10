@@ -45,7 +45,7 @@ import {
     initDnsRewriteToggle,
 } from './dns-shared.js';
 import { toError } from '../types/guards.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { createFocusTrap } from '../utils/focus-trap.js';
 import * as prism from './prism.js';
 
@@ -401,7 +401,7 @@ export async function initSettings() {
     const gotoGithubBtn = document.getElementById('btn-goto-github');
     if (gotoGithubBtn) {
         gotoGithubBtn.onclick = () => {
-            openUrl('https://github.com/Juwan-Hwang/Zephyr');
+            openUrl('https://github.com/redbin1024/Vela');
         };
     }
 

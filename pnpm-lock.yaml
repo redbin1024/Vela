@@ -63,7 +63,7 @@ importers:
       '@tauri-apps/plugin-autostart':
         specifier: 2.5.1
         version: 2.5.1
-      '@zephyr/shared':
+      '@vela/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:

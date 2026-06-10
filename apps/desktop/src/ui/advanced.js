@@ -12,7 +12,7 @@ import { createCollapsible } from './collapsible.js';
 import { invalidateConfigCache } from './cache.js';
 import { advancedLogger } from '../utils/logger.js';
 import { toError } from '../types/guards.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { validateConfig } from './prism.js';
 
 // --- Helpers ---

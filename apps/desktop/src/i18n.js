@@ -8,7 +8,7 @@
  */
 
 import { invoke } from './api.js';
-import { COMMANDS } from '@zephyr/shared';
+import { COMMANDS } from '@vela/shared';
 import { i18nLogger } from './utils/logger.js';
 import { Bus, Events } from './ui/events.js';
 

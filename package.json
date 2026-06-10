@@ -1,17 +1,17 @@
 {
-  "name": "zephyr",
+  "name": "vela",
   "private": true,
   "version": "1.2.0",
   "type": "module",
   "packageManager": "pnpm@10.12.1",
   "scripts": {
-    "dev": "pnpm --filter @zephyr/desktop tauri dev",
-    "build": "pnpm --filter @zephyr/desktop tauri build",
-    "build:css": "pnpm --filter @zephyr/desktop build:css",
+    "dev": "pnpm --filter @vela/desktop tauri dev",
+    "build": "pnpm --filter @vela/desktop tauri build",
+    "build:css": "pnpm --filter @vela/desktop build:css",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "tauri": "pnpm --filter @zephyr/desktop tauri",
+    "tauri": "pnpm --filter @vela/desktop tauri",
     "check:i18n": "node packages/scripts/check-i18n.js"
   },
   "devDependencies": {

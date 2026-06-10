@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 use std::sync::atomic::Ordering;
 use tauri::AppHandle;
 
@@ -45,7 +46,7 @@ fn extract_secret_from_yaml(content: &str) -> Option<String> {
     let yaml: serde_yaml::Value = serde_yaml::from_str(content).ok()?;
     yaml.get("secret")
         .and_then(|v| v.as_str())
-        .map(|s| s.to_owned())
+        .map(std::borrow::ToOwned::to_owned)
 }
 
 use serde_yaml::Value as YamlValue;
@@ -159,7 +160,7 @@ pub async fn restart_core_as_root(app: &AppHandle, enable_tun: bool) -> Result<S
             .map_err(|e| format!("Failed to read config: {e}"))?;
 
         // Extract current secret from config or generate new one
-        secret = extract_secret_from_yaml(&content).unwrap_or_else(|| generate_secret());
+        secret = extract_secret_from_yaml(&content).unwrap_or_else(generate_secret);
 
         // Update TUN setting
         let mut updated = update_tun_in_yaml(&content, enable_tun)?;
@@ -213,15 +214,15 @@ pub async fn restart_core_as_root(app: &AppHandle, enable_tun: bool) -> Result<S
 
     // CRITICAL: Escape paths for shell single-quote context to prevent command injection
     // Replace all ' with '\'' (end quote, escaped quote, start quote)
-    let escaped_config_dir = config_dir_str.replace("'", "'\\''");
-    let escaped_log_path = log_path.replace("'", "'\\''");
+    let escaped_config_dir = config_dir_str.replace('\'', "'\\''");
+    let escaped_log_path = log_path.replace('\'', "'\\''");
 
     // Get binary name from resolved core_path to ensure backward compatibility
     let binary_name = core_path
         .file_name()
         .and_then(|n| n.to_str())
-        .ok_or_else(|| "Invalid core binary name".to_string())?;
-    let escaped_binary_name = binary_name.replace("'", "'\\''");
+        .ok_or_else(|| "Invalid core binary name".to_owned())?;
+    let escaped_binary_name = binary_name.replace('\'', "'\\''");
     // Kill both new (zephyr-mihomo) and legacy (mihomo) names to handle upgrade scenario
     // where a root-owned legacy process might still be running
     let script = format!(
@@ -244,26 +245,20 @@ pub async fn restart_core_as_root(app: &AppHandle, enable_tun: bool) -> Result<S
     tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
 
     // Check if osascript exited quickly with an error (e.g., user canceled)
-    match child.try_wait() {
-        Ok(Some(status)) => {
-            if !status.success() {
-                // Read stderr to get the error
-                let stderr = child.stderr.take();
-                if let Some(mut stderr) = stderr {
-                    let mut err = String::new();
-                    let _ = std::io::Read::read_to_string(&mut stderr, &mut err);
-                    if err.contains("canceled") || err.contains("User canceled") {
-                        return Err("canceled".to_owned());
-                    }
-                    return Err(format!("osascript failed: {err}"));
+    if let Ok(Some(status)) = child.try_wait() {
+        if !status.success() {
+            // Read stderr to get the error
+            let stderr = child.stderr.take();
+            if let Some(mut err_stream) = stderr {
+                let mut err = String::new();
+                let _ = std::io::Read::read_to_string(&mut err_stream, &mut err);
+                if err.contains("canceled") || err.contains("User canceled") {
+                    return Err("canceled".to_owned());
                 }
-                return Err("osascript failed".to_owned());
+                return Err(format!("osascript failed: {err}"));
             }
+            return Err("osascript failed".to_owned());
         }
-        Ok(None) => {
-            // Still running, which is expected - password dialog is showing
-        }
-        Err(_) => {}
     }
 
     // Wait for root mihomo to appear (poll for up to 30 seconds to allow time for password entry)
@@ -492,7 +487,7 @@ const fn has_root_mihomo() -> bool {
 
 /// Kill all mihomo processes with root privileges (kills both root and user processes)
 /// Also cleans up TUN interface and routes to avoid blocking new mihomo startup
-/// Note: Does NOT clear TUN mode flag - caller should call set_tun_mode(false) if disabling TUN
+/// Note: Does NOT clear TUN mode flag - caller should call `set_tun_mode(false)` if disabling TUN
 #[cfg(target_os = "macos")]
 pub fn kill_all_mihomo_as_root() -> Result<(), String> {
     // Reduce MSL to 1s so TIME_WAIT expires quickly (default 15s = 30s TIME_WAIT)
@@ -548,9 +543,8 @@ pub fn disable_tun_cmd(app: tauri::AppHandle) -> Result<bool, String> {
     if is_suid {
         super::core_process::kill_mihomo();
         return Ok(true); // SUID mode, kill_mihomo is enough and fast, no root osascript overhead
-    } else {
-        kill_all_mihomo_as_root()?;
     }
+    kill_all_mihomo_as_root()?;
 
     // Wait for ALL root processes (including osascript shell) to die (Non-SUID legacy root mode only)
     let mut waited = 0;
@@ -683,7 +677,7 @@ pub async fn ensure_mihomo_setuid_root(app: &AppHandle) -> Result<(), String> {
 
     // Set permission SUID
     let core_path_str = core_path.to_string_lossy().into_owned();
-    let escaped_path = core_path_str.replace("'", "'\\''");
+    let escaped_path = core_path_str.replace('\'', "'\\''");
     
     // SUID needs root ownership and 4755 permissions
     let script = format!(
