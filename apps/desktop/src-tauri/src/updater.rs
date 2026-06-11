@@ -662,6 +662,8 @@ pub async fn update_core(
     })?;
 
     let paths = core_manager::ensure_app_storage(app)?;
+    let cache_dir = paths.core_dir.join("cache");
+    let _ = std::fs::create_dir_all(&cache_dir);
 
     // Use unpredictable temp file names to prevent TOCTOU attacks
     let temp_suffix = uuid::Uuid::new_v4();
@@ -669,17 +671,40 @@ pub async fn update_core(
         .core_dir
         .join(format!("core_update_{temp_suffix}.tmp"));
 
-    if let Err(e) = download_release_asset(&window, &url, &archive_path).await {
-        let _ = std::fs::remove_file(&archive_path);
-        return Err(e);
+    let cache_file = cache_dir.join(&asset_name);
+    let mut use_cached = false;
+
+    // Fetch expected hash early to verify cache
+    emit_core_download_status(&window, "Fetching verification info...", 8);
+    let expected_hash = get_expected_sha256(&version, &asset_name).await?;
+
+    if cache_file.exists() {
+        emit_core_download_status(&window, "Verifying local cached core...", 12);
+        if verify_sha256(&cache_file, &expected_hash).is_ok() {
+            use_cached = true;
+        }
     }
 
-    emit_core_download_status(&window, "Verifying file integrity...", 82);
-    let expected_hash = get_expected_sha256(&version, &asset_name).await?;
-    verify_sha256(&archive_path, &expected_hash).inspect_err(|e| {
-        let _ = std::fs::remove_file(&archive_path);
-        let _ = e;
-    })?;
+    if use_cached {
+        emit_core_download_status(&window, "Using cached core package...", 20);
+        std::fs::copy(&cache_file, &archive_path).map_err(|e| {
+            format!("Failed to copy cached core package: {e}")
+        })?;
+    } else {
+        if let Err(e) = download_release_asset(&window, &url, &archive_path).await {
+            let _ = std::fs::remove_file(&archive_path);
+            return Err(e);
+        }
+
+        emit_core_download_status(&window, "Verifying file integrity...", 82);
+        verify_sha256(&archive_path, &expected_hash).inspect_err(|e| {
+            let _ = std::fs::remove_file(&archive_path);
+            let _ = e;
+        })?;
+
+        // Cache the verified package
+        let _ = std::fs::copy(&archive_path, &cache_file);
+    }
 
     emit_core_download_status(&window, "Download complete, extracting core...", 84);
     let temp_exe_path = paths.core_dir.join(format!(
@@ -790,6 +815,7 @@ pub async fn update_core(
         Ok(r) => {
             // Step 3: New core started — delete backup
             let _ = std::fs::remove_file(&backup_path);
+            clean_core_cache(&cache_dir);
             emit_core_download_status(&window, "Core ready", 100);
             Ok(r)
         }
@@ -876,102 +902,144 @@ pub async fn update_geo_data(window: Window) -> Result<String, String> {
         .ok_or("Invalid GeoSite hash format")?
         .to_owned();
 
+    let cache_dir = paths.core_dir.join("cache");
+    let _ = std::fs::create_dir_all(&cache_dir);
+    let cached_geoip = cache_dir.join(format!("geoip_{geoip_expected_hash}.dat"));
+    let cached_geosite = cache_dir.join(format!("geosite_{geosite_expected_hash}.dat"));
+
     // Use unpredictable temp file names to prevent TOCTOU attacks
     let temp_suffix = uuid::Uuid::new_v4();
-
-    // Download GeoIP
-    emit_core_download_status(&window, "Downloading GeoIP...", 10);
     let geoip_path = paths.core_dir.join(format!("geoip_{temp_suffix}.dat.tmp"));
-    let response = client
-        .get(geoip_url)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to download GeoIP: {e}"))?;
 
-    if !response.status().is_success() {
-        return Err(format!(
-            "Failed to download GeoIP: HTTP {}",
-            response.status()
-        ));
-    }
-
-    let mut stream = response.bytes_stream();
-    let mut file = std::fs::File::create(&geoip_path)
-        .map_err(|e| format!("Failed to create geoip temp file: {e}"))?;
-
-    while let Some(item) = stream.next().await {
-        let chunk = match item {
-            Ok(c) => c,
-            Err(e) => {
-                let _ = std::fs::remove_file(&geoip_path);
-                return Err(e.to_string());
-            }
-        };
-        use std::io::Write as _;
-        if let Err(e) = file.write_all(&chunk) {
-            let _ = std::fs::remove_file(&geoip_path);
-            return Err(format!("Failed to write geoip chunk: {e}"));
+    let mut has_geoip_cache = false;
+    if cached_geoip.exists() {
+        emit_core_download_status(&window, "Verifying local cached GeoIP...", 12);
+        if verify_sha256(&cached_geoip, &geoip_expected_hash).is_ok() {
+            has_geoip_cache = true;
         }
     }
 
-    if let Err(e) = file.sync_all() {
-        let _ = std::fs::remove_file(&geoip_path);
-        return Err(e.to_string());
+    if has_geoip_cache {
+        emit_core_download_status(&window, "Using cached GeoIP...", 25);
+        std::fs::copy(&cached_geoip, &geoip_path).map_err(|e| {
+            format!("Failed to copy cached GeoIP to temp path: {e}")
+        })?;
+    } else {
+        // Download GeoIP
+        emit_core_download_status(&window, "Downloading GeoIP...", 10);
+        let response = client
+            .get(geoip_url)
+            .send()
+            .await
+            .map_err(|e| format!("Failed to download GeoIP: {e}"))?;
+
+        if !response.status().is_success() {
+            return Err(format!(
+                "Failed to download GeoIP: HTTP {}",
+                response.status()
+            ));
+        }
+
+        let mut stream = response.bytes_stream();
+        let mut file = std::fs::File::create(&geoip_path)
+            .map_err(|e| format!("Failed to create geoip temp file: {e}"))?;
+
+        while let Some(item) = stream.next().await {
+            let chunk = match item {
+                Ok(c) => c,
+                Err(e) => {
+                    let _ = std::fs::remove_file(&geoip_path);
+                    return Err(e.to_string());
+                }
+            };
+            use std::io::Write as _;
+            if let Err(e) = file.write_all(&chunk) {
+                let _ = std::fs::remove_file(&geoip_path);
+                return Err(format!("Failed to write geoip chunk: {e}"));
+            }
+        }
+
+        if let Err(e) = file.sync_all() {
+            let _ = std::fs::remove_file(&geoip_path);
+            return Err(e.to_string());
+        }
+
+        emit_core_download_status(&window, "Verifying GeoIP...", 45);
+        verify_sha256(&geoip_path, &geoip_expected_hash).inspect_err(|e| {
+            let _ = std::fs::remove_file(&geoip_path);
+            let _ = e;
+        })?;
+
+        // Cache the verified GeoIP
+        let _ = std::fs::copy(&geoip_path, &cached_geoip);
     }
 
-    emit_core_download_status(&window, "Verifying GeoIP...", 45);
-    verify_sha256(&geoip_path, &geoip_expected_hash).inspect_err(|e| {
-        let _ = std::fs::remove_file(&geoip_path);
-        let _ = e;
-    })?;
-
     // Download GeoSite
-    emit_core_download_status(&window, "Downloading GeoSite...", 50);
     let geosite_path = paths
         .core_dir
         .join(format!("geosite_{temp_suffix}.dat.tmp"));
-    let response = client
-        .get(geosite_url)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to download GeoSite: {e}"))?;
-
-    if !response.status().is_success() {
-        return Err(format!(
-            "Failed to download GeoSite: HTTP {}",
-            response.status()
-        ));
-    }
-
-    let mut stream = response.bytes_stream();
-    let mut file = std::fs::File::create(&geosite_path)
-        .map_err(|e| format!("Failed to create geosite temp file: {e}"))?;
-
-    while let Some(item) = stream.next().await {
-        let chunk = match item {
-            Ok(c) => c,
-            Err(e) => {
-                let _ = std::fs::remove_file(&geosite_path);
-                return Err(e.to_string());
-            }
-        };
-        use std::io::Write as _;
-        if let Err(e) = file.write_all(&chunk) {
-            let _ = std::fs::remove_file(&geosite_path);
-            return Err(format!("Failed to write geosite chunk: {e}"));
+    let mut has_geosite_cache = false;
+    if cached_geosite.exists() {
+        emit_core_download_status(&window, "Verifying local cached GeoSite...", 52);
+        if verify_sha256(&cached_geosite, &geosite_expected_hash).is_ok() {
+            has_geosite_cache = true;
         }
     }
 
-    if let Err(e) = file.sync_all() {
-        let _ = std::fs::remove_file(&geosite_path);
-        return Err(e.to_string());
-    }
+    if has_geosite_cache {
+        emit_core_download_status(&window, "Using cached GeoSite...", 65);
+        std::fs::copy(&cached_geosite, &geosite_path).map_err(|e| {
+            format!("Failed to copy cached GeoSite to temp path: {e}")
+        })?;
+    } else {
+        // Download GeoSite
+        emit_core_download_status(&window, "Downloading GeoSite...", 50);
+        let response = client
+            .get(geosite_url)
+            .send()
+            .await
+            .map_err(|e| format!("Failed to download GeoSite: {e}"))?;
 
-    emit_core_download_status(&window, "Verifying GeoSite...", 90);
-    verify_sha256(&geosite_path, &geosite_expected_hash).inspect_err(|e| {
-        let _ = std::fs::remove_file(&geosite_path);
-        let _ = e;
-    })?;
+        if !response.status().is_success() {
+            return Err(format!(
+                "Failed to download GeoSite: HTTP {}",
+                response.status()
+            ));
+        }
+
+        let mut stream = response.bytes_stream();
+        let mut file = std::fs::File::create(&geosite_path)
+            .map_err(|e| format!("Failed to create geosite temp file: {e}"))?;
+
+        while let Some(item) = stream.next().await {
+            let chunk = match item {
+                Ok(c) => c,
+                Err(e) => {
+                    let _ = std::fs::remove_file(&geosite_path);
+                    return Err(e.to_string());
+                }
+            };
+            use std::io::Write as _;
+            if let Err(e) = file.write_all(&chunk) {
+                let _ = std::fs::remove_file(&geosite_path);
+                return Err(format!("Failed to write geosite chunk: {e}"));
+            }
+        }
+
+        if let Err(e) = file.sync_all() {
+            let _ = std::fs::remove_file(&geosite_path);
+            return Err(e.to_string());
+        }
+
+        emit_core_download_status(&window, "Verifying GeoSite...", 90);
+        verify_sha256(&geosite_path, &geosite_expected_hash).inspect_err(|e| {
+            let _ = std::fs::remove_file(&geosite_path);
+            let _ = e;
+        })?;
+
+        // Cache the verified GeoSite
+        let _ = std::fs::copy(&geosite_path, &cached_geosite);
+    }
 
     // Apply updates — atomic swap pattern with rollback on failure.
     // Both geo files must succeed or neither is applied.
@@ -1032,9 +1100,70 @@ pub async fn update_geo_data(window: Window) -> Result<String, String> {
     // Clean up backups
     let _ = std::fs::remove_file(&old_geoip);
     let _ = std::fs::remove_file(&old_geosite);
+    clean_geo_cache(&cache_dir);
 
     emit_core_download_status(&window, "Geo database update complete", 100);
     Ok("Geo databases updated successfully".to_owned())
+}
+
+fn clean_core_cache(cache_dir: &std::path::Path) {
+    if let Ok(entries) = std::fs::read_dir(cache_dir) {
+        let mut files = Vec::new();
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(filename) = path.file_name().and_then(|f| f.to_str()) {
+                    if filename.starts_with("mihomo-") && (filename.ends_with(".zip") || filename.ends_with(".gz")) {
+                        if let Ok(metadata) = entry.metadata() {
+                            if let Ok(mtime) = metadata.modified() {
+                                files.push((path, mtime));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        files.sort_by(|a, b| b.1.cmp(&a.1));
+        for (path, _) in files.iter().skip(2) {
+            let _ = std::fs::remove_file(path);
+        }
+    }
+}
+
+fn clean_geo_cache(cache_dir: &std::path::Path) {
+    if let Ok(entries) = std::fs::read_dir(cache_dir) {
+        let mut geoip_files = Vec::new();
+        let mut geosite_files = Vec::new();
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(filename) = path.file_name().and_then(|f| f.to_str()) {
+                    if filename.starts_with("geoip_") && filename.ends_with(".dat") {
+                        if let Ok(metadata) = entry.metadata() {
+                            if let Ok(mtime) = metadata.modified() {
+                                geoip_files.push((path, mtime));
+                            }
+                        }
+                    } else if filename.starts_with("geosite_") && filename.ends_with(".dat") {
+                        if let Ok(metadata) = entry.metadata() {
+                            if let Ok(mtime) = metadata.modified() {
+                                geosite_files.push((path, mtime));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        geoip_files.sort_by(|a, b| b.1.cmp(&a.1));
+        geosite_files.sort_by(|a, b| b.1.cmp(&a.1));
+
+        for (path, _) in geoip_files.iter().skip(2) {
+            let _ = std::fs::remove_file(path);
+        }
+        for (path, _) in geosite_files.iter().skip(2) {
+            let _ = std::fs::remove_file(path);
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
