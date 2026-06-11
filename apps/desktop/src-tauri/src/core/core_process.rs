@@ -16,7 +16,7 @@ use super::secure_io::write_file_secure;
 const DEFAULT_API_PORT: u16 = 9090;
 const DEFAULT_MIXED_PORT: u16 = 7890;
 #[cfg(target_os = "macos")]
-const PORT_WAIT_MAX_RETRIES: u64 = 50;
+const PORT_WAIT_MAX_RETRIES: u64 = 15;
 #[cfg(target_os = "macos")]
 const PORT_WAIT_INTERVAL_MS: u64 = 100;
 const HEALTH_CHECK_MAX_RETRIES: u32 = 20;
@@ -945,21 +945,16 @@ pub(super) fn generate_secret() -> String {
 /// After killing a process, the OS may keep the port occupied for a short period.
 /// This function polls until the port can be bound or the retry limit is reached.
 #[cfg(target_os = "macos")]
-async fn wait_for_port_free(port: u16) {
+async fn wait_for_port_free(port: u16) -> Result<(), String> {
     for i in 0..PORT_WAIT_MAX_RETRIES {
         if std::net::TcpListener::bind(format!("127.0.0.1:{port}")).is_ok() {
             eprintln!(
                 "[CORE] port {port} confirmed free after {}ms",
                 i * PORT_WAIT_INTERVAL_MS
             );
-            break;
+            return Ok(());
         }
-        if i == PORT_WAIT_MAX_RETRIES - 1 {
-            eprintln!(
-                "[CORE] WARNING: port {port} still occupied after {}ms, proceeding anyway",
-                PORT_WAIT_MAX_RETRIES * PORT_WAIT_INTERVAL_MS
-            );
-        } else {
+        if i != PORT_WAIT_MAX_RETRIES - 1 {
             eprintln!(
                 "[CORE] waiting for port {port}... {}ms",
                 (i + 1) * PORT_WAIT_INTERVAL_MS
@@ -967,6 +962,7 @@ async fn wait_for_port_free(port: u16) {
         }
         tokio::time::sleep(std::time::Duration::from_millis(PORT_WAIT_INTERVAL_MS)).await;
     }
+    Err(format!("Port {port} is occupied by another process and could not be bound."))
 }
 
 /// Attach a log file to a `Command` for stdout/stderr redirection.
@@ -1218,9 +1214,30 @@ pub async fn start_core(
     // If mihomo fails to start due to lock issues, we'll retry after removing it
     // This is handled in the spawn error handling below
 
-    // Wait for port to be truly free (max 5s)
+    // Wait for port to be truly free (max 1.5s)
     #[cfg(target_os = "macos")]
-    wait_for_port_free(DEFAULT_API_PORT).await;
+    if wait_for_port_free(DEFAULT_API_PORT).await.is_err() {
+        // Check if there is a residual root mihomo process
+        if super::tun_manager::has_root_mihomo() {
+            eprintln!("[CORE] Port {DEFAULT_API_PORT} occupied by root mihomo. Attempting smart kill...");
+            if super::tun_manager::smart_kill_all_mihomo_as_root().is_ok() {
+                // Wait again after clean up
+                if wait_for_port_free(DEFAULT_API_PORT).await.is_err() {
+                    return Err(format!(
+                        "Port {DEFAULT_API_PORT} is occupied by a running root mihomo process. We attempted to kill it, but the port remains occupied."
+                    ));
+                }
+            } else {
+                return Err(format!(
+                    "Port {DEFAULT_API_PORT} is occupied by a running root mihomo process. Please stop it or authorize the application to clear it."
+                ));
+            }
+        } else {
+            return Err(format!(
+                "Port {DEFAULT_API_PORT} is occupied by another application (e.g. Clash Verge or another running core). Please close it first."
+            ));
+        }
+    }
 
     let exe_path = get_core_exe_path(&app)?;
 

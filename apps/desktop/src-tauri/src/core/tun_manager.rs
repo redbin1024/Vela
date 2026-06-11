@@ -463,7 +463,7 @@ mod tests {
 /// Check if there's a root-owned mihomo process running
 /// Checks for both zephyr-mihomo (new) and mihomo (legacy) for backward compatibility
 #[cfg(target_os = "macos")]
-fn has_root_mihomo() -> bool {
+pub fn has_root_mihomo() -> bool {
     if let Ok(output) = std::process::Command::new("ps")
         .args(["-axo", "user,comm"])
         .output()
@@ -480,8 +480,7 @@ fn has_root_mihomo() -> bool {
 }
 
 #[cfg(not(target_os = "macos"))]
-#[allow(dead_code)]
-const fn has_root_mihomo() -> bool {
+pub const fn has_root_mihomo() -> bool {
     false
 }
 
